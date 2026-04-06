@@ -1,14 +1,15 @@
-package com.practice.test.Domain.Entities;
+package com.practice.test.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.scheduling.annotation.Async;
 
+@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Getter
 @Entity
-@Table(name = "users")
+@Table(name = "Users")
 public class User {
 
     @Id
@@ -23,12 +24,6 @@ public class User {
 
     @Column(nullable = false)
     private String password;
-
-    public User(final String name, final String email, final String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
 
     @Async
     public void initProfile() {

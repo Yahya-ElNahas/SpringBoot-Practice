@@ -1,4 +1,4 @@
-package com.practice.test.Application.Dtos;
+package com.practice.test.Dtos.Responses;
 
 import java.time.LocalDateTime;
 
