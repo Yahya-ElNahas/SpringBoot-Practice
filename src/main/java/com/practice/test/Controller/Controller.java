@@ -1,5 +1,6 @@
 package com.practice.test.Controller;
 
+import com.practice.test.Dtos.Requests.UpdateUserAddressRequest;
 import com.practice.test.Dtos.Responses.AllProductsResponse;
 import com.practice.test.Dtos.Requests.CreateProductRequest;
 import com.practice.test.Dtos.Requests.CreateUserRequest;
@@ -20,6 +21,12 @@ public class Controller {
     @PostMapping("/users")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         UserResponse result = service.createUser(createUserRequest);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/users/updateAddress")
+    public ResponseEntity<UserResponse> updateUserAddress(@RequestBody UpdateUserAddressRequest updateUserAddressRequest) {
+        UserResponse result = service.updateUserAddress(updateUserAddressRequest);
         return ResponseEntity.ok(result);
     }
 

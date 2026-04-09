@@ -1,15 +1,14 @@
-package com.practice.test.Entities;
+package com.practice.test.Entities.User;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.scheduling.annotation.Async;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Getter
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -25,8 +24,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Async
-    public void initProfile() {
-        System.out.println("profile initialized");
-    }
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumns({
+            @JoinColumn(name = "address_mobile", referencedColumnName = "mobile"),
+            @JoinColumn(name = "address_street", referencedColumnName = "street")
+    })
+    @Setter
+    private UserAddress address;
 }

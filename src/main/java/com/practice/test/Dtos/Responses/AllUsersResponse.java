@@ -1,6 +1,6 @@
 package com.practice.test.Dtos.Responses;
 
-import com.practice.test.Entities.User;
+import com.practice.test.Entities.User.User;
 
 import java.util.List;
 

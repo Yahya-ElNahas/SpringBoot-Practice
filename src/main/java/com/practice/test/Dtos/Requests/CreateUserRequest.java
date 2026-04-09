@@ -5,11 +5,8 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class CreateUserRequest {
-
     public final String name;
-
     public final String email;
-
     @Password
-    public String password;
+    public final String password;
 }

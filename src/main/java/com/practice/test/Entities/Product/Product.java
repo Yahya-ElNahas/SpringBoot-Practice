@@ -1,4 +1,4 @@
-package com.practice.test.Entities;
+package com.practice.test.Entities.Product;
 
 import lombok.*;
 

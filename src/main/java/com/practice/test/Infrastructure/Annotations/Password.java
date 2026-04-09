@@ -1,5 +1,6 @@
 package com.practice.test.Infrastructure.Annotations;
 
+import com.practice.test.Infrastructure.Annotations.Validators.PasswordAnnotationValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
