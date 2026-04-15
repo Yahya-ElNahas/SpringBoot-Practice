@@ -1,26 +1,48 @@
 package com.practice.test.Controller;
 
+import com.practice.test.Dtos.Requests.LoginRequest;
 import com.practice.test.Dtos.Requests.UpdateUserAddressRequest;
 import com.practice.test.Dtos.Responses.AllProductsResponse;
 import com.practice.test.Dtos.Requests.CreateProductRequest;
 import com.practice.test.Dtos.Requests.CreateUserRequest;
 import com.practice.test.Dtos.Responses.AllUsersResponse;
+import com.practice.test.Dtos.Responses.AuthResponse;
 import com.practice.test.Dtos.Responses.UserResponse;
-import com.practice.test.Service.Service;
+import com.practice.test.Service.IService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
 public class Controller {
 
-    private final Service service;
+    private final IService service;
 
-    @PostMapping("/users")
+    @PostMapping("/auth/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        AuthResponse result = service.login(loginRequest);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/auth/signup")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         UserResponse result = service.createUser(createUserRequest);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String result = service.logout(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/auth/refreshToken")
+    public ResponseEntity<String> refreshToken(HttpServletRequest request) {
+        String result = service.refreshAccessToken(request);
         return ResponseEntity.ok(result);
     }
 
@@ -42,15 +64,17 @@ public class Controller {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products/createTable")
     public ResponseEntity<String> createProductsTable() {
         String result = service.createProductsTable();
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products")
-    public ResponseEntity<String> createProduct(@RequestBody CreateProductRequest body) {
-        String result = service.createProduct(body);
+    public ResponseEntity<String> createProduct(@RequestBody CreateProductRequest createProductRequest) {
+        String result = service.createProduct(createProductRequest);
         return ResponseEntity.ok(result);
     }
 

@@ -3,12 +3,12 @@ package com.practice.test.Entities.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
-@Getter
 @Entity
 @Table(name = "users")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@ToString
 public class User {
 
     @Id
@@ -23,6 +23,10 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumns({
