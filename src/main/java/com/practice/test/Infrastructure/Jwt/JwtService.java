@@ -40,15 +40,6 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractId(String token) {
-        return Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getId();
-    }
-
     public String extractEmail(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
@@ -56,15 +47,6 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
-    }
-
-    public String extractRole(String token) {
-        return Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
     }
 
     private boolean isTokenExpired(String token) {

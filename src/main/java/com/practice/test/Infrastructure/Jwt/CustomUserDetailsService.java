@@ -2,8 +2,8 @@ package com.practice.test.Infrastructure.Jwt;
 
 import com.practice.test.Entities.User.User;
 import com.practice.test.Repositories.UserRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,7 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
+    public @NonNull UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
         Optional<User> fetchedUser = userRepository.findByEmail(email);
 
         if(fetchedUser.isEmpty()) {

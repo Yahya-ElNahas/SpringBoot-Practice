@@ -12,6 +12,7 @@ import com.practice.test.Service.IService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,63 +24,63 @@ public class Controller {
     private final IService service;
 
     @PostMapping("/auth/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<@NonNull AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         AuthResponse result = service.login(loginRequest);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
+    public ResponseEntity<@NonNull UserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         UserResponse result = service.createUser(createUserRequest);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/auth/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request) {
+    public ResponseEntity<@NonNull String> logout(HttpServletRequest request) {
         String result = service.logout(request);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/auth/refreshToken")
-    public ResponseEntity<String> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<@NonNull String> refreshToken(HttpServletRequest request) {
         String result = service.refreshAccessToken(request);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/users/updateAddress")
-    public ResponseEntity<UserResponse> updateUserAddress(@RequestBody UpdateUserAddressRequest updateUserAddressRequest) {
+    public ResponseEntity<@NonNull UserResponse> updateUserAddress(@RequestBody UpdateUserAddressRequest updateUserAddressRequest) {
         UserResponse result = service.updateUserAddress(updateUserAddressRequest);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/users", params = "email")
-    public ResponseEntity<UserResponse> getUserByEmail(@RequestParam(name = "email") String email) {
+    public ResponseEntity<@NonNull UserResponse> getUserByEmail(@RequestParam(name = "email") String email) {
         UserResponse result = service.getUserByEmail(email);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<AllUsersResponse> AllUsers() {
+    public ResponseEntity<@NonNull AllUsersResponse> AllUsers() {
         AllUsersResponse result = service.getAllUsers();
         return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products/createTable")
-    public ResponseEntity<String> createProductsTable() {
+    public ResponseEntity<@NonNull String> createProductsTable() {
         String result = service.createProductsTable();
         return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products")
-    public ResponseEntity<String> createProduct(@RequestBody CreateProductRequest createProductRequest) {
+    public ResponseEntity<@NonNull String> createProduct(@RequestBody CreateProductRequest createProductRequest) {
         String result = service.createProduct(createProductRequest);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/products")
-    public ResponseEntity<AllProductsResponse> getAllProducts() {
+    public ResponseEntity<@NonNull AllProductsResponse> getAllProducts() {
         AllProductsResponse result = service.getAllProducts();
         return ResponseEntity.ok(result);
     }

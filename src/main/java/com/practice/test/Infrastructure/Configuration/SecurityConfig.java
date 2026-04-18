@@ -26,10 +26,11 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/auth/**").permitAll()
@@ -45,13 +46,11 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint((
-                            (request, response, authException) -> {
-                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            }
+                            (request, response, authException) ->
+                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)
                         )).accessDeniedHandler(
-                                (request, response, authException) -> {
-                                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                                }
+                                (request, response, authException) ->
+                                        response.setStatus(HttpServletResponse.SC_FORBIDDEN)
                         )
                 );
 

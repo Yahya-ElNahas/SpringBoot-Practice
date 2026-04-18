@@ -2,6 +2,7 @@ package com.practice.test.Infrastructure.Exceptions;
 
 import com.practice.test.Dtos.Responses.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,7 +17,7 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CodedException.class)
-    public ResponseEntity<ErrorResponse> handleCodedExceptions(CodedException ex, HttpServletRequest request) {
+    public ResponseEntity<@NonNull ErrorResponse> handleCodedExceptions(CodedException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse(
                 ex.getStatus().value(),
                 ex.getStatus().getReasonPhrase(),
@@ -27,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<@NonNull ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex, HttpServletRequest request) {
+    public ResponseEntity<@NonNull ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex, HttpServletRequest request) {
 
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),

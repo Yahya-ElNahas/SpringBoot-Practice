@@ -12,16 +12,16 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface IService {
 
-    public UserResponse createUser(CreateUserRequest body);
-    public AuthResponse login(LoginRequest body);
-    public String logout(HttpServletRequest request);
-    public String refreshAccessToken(HttpServletRequest request);
+    UserResponse createUser(CreateUserRequest body);
+    AuthResponse login(LoginRequest body);
+    String logout(HttpServletRequest request);
+    String refreshAccessToken(HttpServletRequest request);
 
-    public UserResponse getUserByEmail(String email);
-    public UserResponse updateUserAddress(UpdateUserAddressRequest body);
-    public AllUsersResponse getAllUsers();
+    UserResponse getUserByEmail(String email);
+    UserResponse updateUserAddress(UpdateUserAddressRequest body);
+    AllUsersResponse getAllUsers();
 
-    public String createProductsTable();
-    public String createProduct(CreateProductRequest body);
-    public AllProductsResponse getAllProducts();
+    String createProductsTable();
+    String createProduct(CreateProductRequest body);
+    AllProductsResponse getAllProducts();
 }

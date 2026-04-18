@@ -1,14 +1,12 @@
 package com.practice.test.Infrastructure.Jwt;
 
 import com.practice.test.Dtos.Responses.ErrorResponse;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,8 +26,11 @@ public class JwtFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -53,22 +54,22 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
             }
-        } catch (ExpiredJwtException e) {
-            sendError(request, response, "Token expired");
-            return;
         } catch (Exception e) {
-            sendError(request, response, "Invalid or expired token");
+            sendTokenError(request, response);
             return;
         }
         filterChain.doFilter(request, response);
     }
 
-    private void sendError(HttpServletRequest request, HttpServletResponse response, String message) throws IOException {
+    private void sendTokenError(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         ErrorResponse errorResponse = new ErrorResponse(
                 401,
                 "Unauthorized",
-                message,
+                "Invalid or expired token",
                 request.getRequestURI(),
                 LocalDateTime.now()
         );

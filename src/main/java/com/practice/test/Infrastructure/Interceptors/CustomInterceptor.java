@@ -13,13 +13,22 @@ import org.springframework.web.servlet.ModelAndView;
 public class CustomInterceptor implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
+    public boolean preHandle(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull Object handler
+    ) {
         System.out.println("Pre handle called");
         return true;
     }
 
     @Override
-    public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+    public void postHandle(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull Object handler,
+            @Nullable ModelAndView modelAndView
+    ) {
         System.out.println("Post handle called\n~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
 }

@@ -33,13 +33,11 @@ public class ProductRepository {
     }
 
     public List<Product> getAllProducts() {
-        return jdbcTemplate.query("SELECT * FROM Products", (rs, rowNum) -> {
-            return new Product(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getDouble("price"),
-                    rs.getInt("stock")
-            );
-        });
+        return jdbcTemplate.query("SELECT * FROM Products", (rs, rowNum) -> new Product(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getDouble("price"),
+                rs.getInt("stock")
+        ));
     }
 }

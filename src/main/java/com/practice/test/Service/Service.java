@@ -40,7 +40,14 @@ public class Service implements IService {
             throw new EmailExistsException();
         }
 
-        User user = new User(0, body.name, body.email, passwordEncoder.encode(body.password), body.role, null);
+        User user = new User(
+                0,
+                body.name,
+                body.email,
+                passwordEncoder.encode(body.password),
+                body.role,
+                null
+        );
         User savedUser = userRepository.save(user);
 
         return new UserResponse(savedUser.getId(), savedUser.getName(), savedUser.getEmail(), null);
@@ -90,7 +97,10 @@ public class Service implements IService {
             throw new ExpiredTokenException();
         }
 
-        return jwtService.generateToken(refreshToken.getUser().getEmail(), refreshToken.getUser().getRole().name());
+        return jwtService.generateToken(
+                refreshToken.getUser().getEmail(),
+                refreshToken.getUser().getRole().name()
+        );
     }
 
     public UserResponse getUserByEmail(String email) {
@@ -117,7 +127,12 @@ public class Service implements IService {
         user.setAddress(savedAddress);
         User savedUser = userRepository.save(user);
 
-        return new UserResponse(savedUser.getId(), savedUser.getName(), savedUser.getEmail(), savedUser.getAddress());
+        return new UserResponse(
+                savedUser.getId(),
+                savedUser.getName(),
+                savedUser.getEmail(),
+                savedUser.getAddress()
+        );
     }
 
     public AllUsersResponse getAllUsers() {
