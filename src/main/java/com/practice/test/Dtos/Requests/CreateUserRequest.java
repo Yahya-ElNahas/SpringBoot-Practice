@@ -7,23 +7,20 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 
-@AllArgsConstructor
-public class CreateUserRequest {
+public record CreateUserRequest(
 
     @NotBlank
-    public final String name;
+    String name,
 
     @NotBlank
     @Email
-    public final String email;
+    String email,
 
     @NotBlank
     @Password
-    public final String password;
+    String password,
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    public final UserRole role;
-}
+    UserRole role
+) {}

@@ -4,4 +4,4 @@ import com.practice.test.Entities.Cart.CartItem;
 
 import java.util.List;
 
-public record UserResponse(int id, String name, String email, List<CartItem> cart) {}
+public record CartResponse(List<CartItem> cart) {}

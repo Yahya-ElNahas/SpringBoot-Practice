@@ -1,6 +1,8 @@
 package com.practice.test.Infrastructure.Jwt;
 
 import com.practice.test.Dtos.Responses.ErrorResponse;
+import com.practice.test.Repositories.SessionRepository;
+import com.practice.test.Service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,8 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+    private final SessionRepository sessionRepository;
 
     @Override
     protected void doFilterInternal(
@@ -41,20 +46,31 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            String email = jwtService.extractEmail(token);
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            jwtService.validateToken(token);
 
-                if(jwtService.isTokenValid(token, userDetails.getUsername())) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities());
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
-            }
+            String email = jwtService.extractEmail(token);
+            String role = jwtService.extractRole(token);
+            int sessionId = jwtService.extractSessionId(token);
+
+            System.out.println(email + ", " + role + ", " + sessionId);
+
+            GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+
+            JwtUserPrincipal principal = new JwtUserPrincipal(email, sessionId, authority);
+
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    principal,
+                    null,
+                    List.of(authority)
+            );
+            authenticationToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
         } catch (Exception e) {
+            SecurityContextHolder.clearContext();
             sendTokenError(request, response);
             return;
         }

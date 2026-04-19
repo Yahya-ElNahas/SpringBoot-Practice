@@ -16,8 +16,8 @@ import java.util.List;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(CodedException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleCodedExceptions(CodedException ex, HttpServletRequest request) {
+    @ExceptionHandler(GeneralException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleCodedExceptions(GeneralException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse(
                 ex.getStatus().value(),
                 ex.getStatus().getReasonPhrase(),

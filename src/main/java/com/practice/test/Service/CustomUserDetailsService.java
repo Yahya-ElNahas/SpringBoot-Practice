@@ -1,4 +1,4 @@
-package com.practice.test.Infrastructure.Jwt;
+package com.practice.test.Service;
 
 import com.practice.test.Entities.User.User;
 import com.practice.test.Repositories.UserRepository;
