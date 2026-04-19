@@ -1,12 +1,12 @@
 package com.practice.test.Repositories;
 
-import com.practice.test.Entities.RefreshToken.RefreshToken;
+import com.practice.test.Entities.Session.Session;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface RefreshTokenRepository extends JpaRepository<@NonNull RefreshToken, @NonNull Integer> {
+public interface RefreshTokenRepository extends JpaRepository<@NonNull Session, @NonNull Integer> {
 
-    Optional<RefreshToken> findByToken(String token);
+    Optional<Session> findByToken(String token);
 }

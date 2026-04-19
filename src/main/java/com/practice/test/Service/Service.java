@@ -8,7 +8,7 @@ import com.practice.test.Dtos.Responses.AllProductsResponse;
 import com.practice.test.Dtos.Responses.AllUsersResponse;
 import com.practice.test.Dtos.Responses.AuthResponse;
 import com.practice.test.Dtos.Responses.UserResponse;
-import com.practice.test.Entities.RefreshToken.RefreshToken;
+import com.practice.test.Entities.Session.Session;
 import com.practice.test.Entities.User.User;
 import com.practice.test.Entities.User.UserAddress;
 import com.practice.test.Entities.User.UserAddressCK;
@@ -76,7 +76,7 @@ public class Service implements IService {
             throw new RefreshTokenNotProvidedException();
         }
 
-        RefreshToken refreshToken = refreshTokenService.findByToken(authHeader.substring(7));
+        Session refreshToken = refreshTokenService.findByToken(authHeader.substring(7));
         refreshToken.setRevoked(true);
 
         return "Logged out";
@@ -90,7 +90,7 @@ public class Service implements IService {
             throw new RefreshTokenNotProvidedException();
         }
 
-        RefreshToken refreshToken = refreshTokenService.findByToken(authHeader.substring(7));
+        Session refreshToken = refreshTokenService.findByToken(authHeader.substring(7));
 
         if(refreshTokenService.isTokenExpired(refreshToken)) {
             refreshToken.setRevoked(true);

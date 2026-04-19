@@ -1,4 +1,4 @@
-package com.practice.test.Entities.RefreshToken;
+package com.practice.test.Entities.Session;
 
 import com.practice.test.Entities.User.User;
 import jakarta.persistence.*;
@@ -10,17 +10,17 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "refresh_token")
+@Table(name = "sessions")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class RefreshToken {
+public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private User user;
 
     @Column(nullable = false, unique = true)
