@@ -1,6 +1,7 @@
 package com.practice.test.Controller;
 
 import com.practice.test.Dtos.Internal.AuthTokens;
+import com.practice.test.Dtos.Requests.AddToCartRequest;
 import com.practice.test.Dtos.Requests.LoginRequest;
 import com.practice.test.Dtos.Responses.*;
 import com.practice.test.Dtos.Requests.CreateProductRequest;
@@ -87,6 +88,14 @@ public class Controller {
     public ResponseEntity<@NonNull AllProductsResponse> getAllProducts() {
         AllProductsResponse result = service.getAllProducts();
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/cart/addToCart")
+    public ResponseEntity<@NonNull CartResponse> addProductToCart(
+            @RequestBody AddToCartRequest addToCartRequestBody
+    ) {
+        CartResponse response = service.addProductToCart(addToCartRequestBody);
+        return ResponseEntity.ok(response);
     }
 }
 

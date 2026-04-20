@@ -1,8 +1,8 @@
 package com.practice.test.Infrastructure.Jwt;
 
 import com.practice.test.Dtos.Responses.ErrorResponse;
+import com.practice.test.Entities.Session.Session;
 import com.practice.test.Repositories.SessionRepository;
-import com.practice.test.Service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +27,6 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
     private final SessionRepository sessionRepository;
 
     @Override
@@ -52,7 +51,12 @@ public class JwtFilter extends OncePerRequestFilter {
             String role = jwtService.extractRole(token);
             int sessionId = jwtService.extractSessionId(token);
 
-            System.out.println(email + ", " + role + ", " + sessionId);
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(Exception::new);
+            if(session.isRevoked() || session.getExpiryDate().isBefore(LocalDateTime.now())
+            ) {
+                throw new Exception();
+            }
 
             GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 

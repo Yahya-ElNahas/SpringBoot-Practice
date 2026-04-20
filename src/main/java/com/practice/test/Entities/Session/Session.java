@@ -20,7 +20,8 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne
+    @ManyToOne
+    @Setter
     private User user;
 
     @Column(nullable = false, unique = true)

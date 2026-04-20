@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -27,12 +26,12 @@ public class JwtService {
                 .claim("role", role)
                 .claim("sessionId", sessionId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 1))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public void validateToken(String token) throws Exception {
+    public void validateToken(String token) {
         Jwts.parser()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -51,27 +50,11 @@ public class JwtService {
         return extractAllClaims(token).get("sessionId", Integer.class);
     }
 
-    public boolean isTokenValid(String token, String email) {
-        String extractedEmail = extractEmail(token);
-
-        return email != null && email.equals(extractedEmail) && !isTokenExpired(token);
-    }
-
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    private boolean isTokenExpired(String token) {
-        Date expirationDate = Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expirationDate.before(new Date());
     }
 }

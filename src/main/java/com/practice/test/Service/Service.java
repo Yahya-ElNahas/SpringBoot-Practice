@@ -1,24 +1,29 @@
 package com.practice.test.Service;
 
 import com.practice.test.Dtos.Internal.AuthTokens;
+import com.practice.test.Dtos.Internal.CartItemResponse;
 import com.practice.test.Dtos.Requests.AddToCartRequest;
 import com.practice.test.Dtos.Requests.CreateProductRequest;
 import com.practice.test.Dtos.Requests.CreateUserRequest;
 import com.practice.test.Dtos.Requests.LoginRequest;
 import com.practice.test.Dtos.Responses.*;
+import com.practice.test.Entities.Cart.CartItem;
 import com.practice.test.Entities.Product.Product;
 import com.practice.test.Entities.Session.Session;
 import com.practice.test.Entities.User.User;
 import com.practice.test.Infrastructure.Exceptions.*;
 import com.practice.test.Infrastructure.Jwt.JwtService;
+import com.practice.test.Infrastructure.Jwt.JwtUserPrincipal;
 import com.practice.test.Repositories.ProductRepository;
 import com.practice.test.Repositories.SessionRepository;
 import com.practice.test.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @org.springframework.stereotype.Service
 @AllArgsConstructor
@@ -65,12 +70,16 @@ public class Service implements IService {
                 0,
                 user,
                 tokenService.hash(refreshToken),
-                LocalDateTime.now().plusMinutes(5),
+                LocalDateTime.now().plusHours(1),
                 false
         );
         Session savedSession = sessionRepository.save(session);
 
-        String accessToken = jwtService.generateToken(user.getEmail(), user.getRole().name(), savedSession.getId());
+        String accessToken = jwtService.generateToken(
+                user.getEmail(),
+                user.getRole().name(),
+                savedSession.getId()
+        );
 
         return new AuthTokens(accessToken, refreshToken);
     }
@@ -92,10 +101,14 @@ public class Service implements IService {
         String newRefreshToken = tokenService.generateRefreshToken();
 
         session.setToken(tokenService.hash(newRefreshToken));
-        session.setExpiryDate(LocalDateTime.now().plusMinutes(5));
+        session.setExpiryDate(LocalDateTime.now().plusHours(1));
         Session savedSession = sessionRepository.save(session);
 
-        String accessToken = jwtService.generateToken(user.getEmail(), user.getRole().name(), savedSession.getId());
+        String accessToken = jwtService.generateToken(
+                user.getEmail(),
+                user.getRole().name(),
+                savedSession.getId()
+        );
 
         return new AuthTokens(accessToken, newRefreshToken);
     }
@@ -144,10 +157,39 @@ public class Service implements IService {
     }
 
     public CartResponse addProductToCart(AddToCartRequest body) {
+        JwtUserPrincipal principal = (JwtUserPrincipal)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User user = userRepository.findByEmail(principal.getEmail())
+                .orElseThrow(UserNotFoundException::new);
+
+
         Product product = productRepository.findById(body.productId())
                 .orElseThrow(ProductNotFoundException::new);
 
+        if(body.quantity() > product.getStock()) {
+            throw new InsufficientStockException(product.getStock());
+        }
 
+        CartItem cartItem = new CartItem(
+                0,
+                user,
+                product,
+                body.quantity()
+        );
+
+        user.addToCart(cartItem);
+        User savedUser = userRepository.save(user);
+
+        return new CartResponse(
+                savedUser.getCart().stream().map(
+                        item -> new CartItemResponse(
+                            item.getId(),
+                            item.getProduct(),
+                            item.getQuantity()
+                        )
+                ).toList()
+        );
     }
 }
 
