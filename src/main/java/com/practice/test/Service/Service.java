@@ -18,6 +18,8 @@ import com.practice.test.Repositories.ProductRepository;
 import com.practice.test.Repositories.SessionRepository;
 import com.practice.test.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,8 @@ public class Service implements IService {
     private final JwtService jwtService;
     private final SessionRepository sessionRepository;
     private final TokenService tokenService;
+
+    private final MessageSource messageSource;
 
     @Transactional
     public UserResponse createUser(CreateUserRequest body) {

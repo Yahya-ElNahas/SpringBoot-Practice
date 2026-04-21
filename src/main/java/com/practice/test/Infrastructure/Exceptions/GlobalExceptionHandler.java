@@ -3,6 +3,10 @@ package com.practice.test.Infrastructure.Exceptions;
 import com.practice.test.Dtos.Responses.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,14 +18,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageSource messageSource;
 
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleCodedExceptions(GeneralException ex, HttpServletRequest request) {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse(
                 ex.getStatus().value(),
                 ex.getStatus().getReasonPhrase(),
-                ex.getMessage(),
+                messageSource.getMessage(ex.getMessage(), ex.getArgs(), LocaleContextHolder.getLocale()),
                 request.getRequestURI(),
                 LocalDateTime.now()
         ));

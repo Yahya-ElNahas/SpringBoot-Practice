@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class ProductNotFoundException extends GeneralException {
     public ProductNotFoundException() {
-        super("Product not found", HttpStatus.NOT_FOUND);
+        super("exception.product_not_found", null, HttpStatus.NOT_FOUND);
     }
 }
