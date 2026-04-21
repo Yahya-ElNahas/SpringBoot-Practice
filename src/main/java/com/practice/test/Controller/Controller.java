@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1")
 @AllArgsConstructor
 public class Controller {
 
@@ -68,8 +69,13 @@ public class Controller {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<@NonNull AllUsersResponse> AllUsers() {
-        AllUsersResponse result = service.getAllUsers();
+    public ResponseEntity<@NonNull AllUsersResponse> AllUsers(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "5") int pageSize,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection
+    ) {
+        AllUsersResponse result = service.getAllUsers(pageNumber, pageSize,  sortBy, sortDirection);
         return ResponseEntity.ok(result);
     }
 
@@ -88,7 +94,7 @@ public class Controller {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/cart/addToCart")
+    @PostMapping("/cart/item")
     public ResponseEntity<@NonNull CartResponse> addProductToCart(
             @RequestBody AddToCartRequest addToCartRequestBody
     ) {

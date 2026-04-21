@@ -19,11 +19,16 @@ import com.practice.test.Repositories.ProductRepository;
 import com.practice.test.Repositories.SessionRepository;
 import com.practice.test.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @org.springframework.stereotype.Service
 @AllArgsConstructor
@@ -130,14 +135,32 @@ public class Service implements IService {
         return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getCart());
     }
 
-    public AllUsersResponse getAllUsers() {
-        return new AllUsersResponse(
-                userRepository.findAll().stream().map(user -> new UserResponse(
+    public AllUsersResponse getAllUsers(
+            int pageNumber,
+            int pageSize,
+            String sortBy,
+            String sortDirection
+    ) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<User> usersPage = userRepository.findAll(pageable);
+
+        List<UserResponse> userResponse = usersPage.getContent()
+                .stream().map(user -> new UserResponse(
                         user.getId(),
                         user.getName(),
                         user.getEmail(),
                         user.getCart()
-                )).toList()
+                )).toList();
+
+        return new AllUsersResponse(
+                userResponse,
+                usersPage.getNumber(),
+                usersPage.getSize(),
+                usersPage.getTotalElements(),
+                usersPage.getTotalPages()
         );
     }
 

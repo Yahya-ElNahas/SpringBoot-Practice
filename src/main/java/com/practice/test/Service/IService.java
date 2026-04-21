@@ -12,7 +12,7 @@ public interface IService {
     String logout(String refreshToken);
 
     UserResponse getUserByEmail(String email);
-    AllUsersResponse getAllUsers();
+    AllUsersResponse getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDirection);
 
     ProductResponse createProduct(CreateProductRequest body);
     AllProductsResponse getAllProducts();
