@@ -1,6 +1,6 @@
 //package com.practice.test.Repositories;
 //
-//import com.practice.test.Entities.Product.Product;
+//import com.practice.test.Entities.Product;
 //import org.springframework.jdbc.core.JdbcTemplate;
 //import org.springframework.stereotype.Repository;
 //

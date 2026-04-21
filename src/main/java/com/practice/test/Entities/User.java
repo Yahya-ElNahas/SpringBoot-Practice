@@ -1,22 +1,24 @@
-package com.practice.test.Entities.User;
+package com.practice.test.Entities;
 
-import com.practice.test.Entities.Cart.CartItem;
+import com.practice.test.Entities.Enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 @ToString
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false)
     private String name;

@@ -1,7 +1,8 @@
 package com.practice.test.Dtos.Responses;
 
-import com.practice.test.Entities.Cart.CartItem;
+import com.practice.test.Entities.CartItem;
 
 import java.util.List;
+import java.util.UUID;
 
-public record UserResponse(int id, String name, String email, List<CartItem> cart) {}
+public record UserResponse(UUID id, String name, String email, List<CartItem> cart) {}

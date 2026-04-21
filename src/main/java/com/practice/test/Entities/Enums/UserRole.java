@@ -1,4 +1,4 @@
-package com.practice.test.Entities.User;
+package com.practice.test.Entities.Enums;
 
 public enum UserRole {
     USER,

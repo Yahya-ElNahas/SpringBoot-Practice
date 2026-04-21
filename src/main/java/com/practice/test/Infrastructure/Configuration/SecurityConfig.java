@@ -1,6 +1,6 @@
 package com.practice.test.Infrastructure.Configuration;
 
-import com.practice.test.Entities.User.UserRole;
+import com.practice.test.Entities.Enums.UserRole;
 import com.practice.test.Infrastructure.Jwt.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

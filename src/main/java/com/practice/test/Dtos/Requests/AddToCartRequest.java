@@ -2,4 +2,6 @@ package com.practice.test.Dtos.Requests;
 
 import jakarta.validation.constraints.Positive;
 
-public record AddToCartRequest(int productId, @Positive int quantity) {}
+import java.util.UUID;
+
+public record AddToCartRequest(UUID productId, @Positive int quantity) {}

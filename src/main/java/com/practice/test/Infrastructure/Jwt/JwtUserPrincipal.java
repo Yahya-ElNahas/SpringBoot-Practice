@@ -1,14 +1,16 @@
 package com.practice.test.Infrastructure.Jwt;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 
-@AllArgsConstructor
-@Getter
-public class JwtUserPrincipal {
+import java.util.UUID;
 
-    private String email;
-    private int sessionId;
-    private GrantedAuthority authority;
-}
+@NullMarked
+public record JwtUserPrincipal(
+
+        UUID userId,
+
+        UUID sessionId,
+
+        GrantedAuthority authority
+) {}

@@ -1,7 +1,9 @@
 package com.practice.test.Repositories;
 
-import com.practice.test.Entities.Cart.CartItem;
+import com.practice.test.Entities.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
+import java.util.UUID;
+
+public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
 }

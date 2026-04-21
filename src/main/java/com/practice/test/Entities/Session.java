@@ -1,24 +1,22 @@
-package com.practice.test.Entities.Session;
+package com.practice.test.Entities;
 
-import com.practice.test.Entities.User.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "sessions")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 public class Session {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne
     @Setter
@@ -33,5 +31,5 @@ public class Session {
     private LocalDateTime expiryDate;
 
     @Setter
-    private boolean revoked;
+    private boolean revoked = false;
 }

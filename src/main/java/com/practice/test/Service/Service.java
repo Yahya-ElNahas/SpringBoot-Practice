@@ -7,19 +7,18 @@ import com.practice.test.Dtos.Requests.CreateProductRequest;
 import com.practice.test.Dtos.Requests.CreateUserRequest;
 import com.practice.test.Dtos.Requests.LoginRequest;
 import com.practice.test.Dtos.Responses.*;
-import com.practice.test.Entities.Cart.CartItem;
-import com.practice.test.Entities.Product.Product;
-import com.practice.test.Entities.Session.Session;
-import com.practice.test.Entities.User.User;
+import com.practice.test.Entities.CartItem;
+import com.practice.test.Entities.Product;
+import com.practice.test.Entities.Session;
+import com.practice.test.Entities.User;
 import com.practice.test.Infrastructure.Exceptions.*;
 import com.practice.test.Infrastructure.Jwt.JwtService;
 import com.practice.test.Infrastructure.Jwt.JwtUserPrincipal;
+import com.practice.test.Repositories.CartItemRepository;
 import com.practice.test.Repositories.ProductRepository;
 import com.practice.test.Repositories.SessionRepository;
 import com.practice.test.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,12 +31,13 @@ public class Service implements IService {
 
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
     private final SessionRepository sessionRepository;
+    private final CartItemRepository cartItemRepository;
+
+    private final JwtService jwtService;
     private final TokenService tokenService;
 
-    private final MessageSource messageSource;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public UserResponse createUser(CreateUserRequest body) {
@@ -45,14 +45,12 @@ public class Service implements IService {
             throw new EmailExistsException();
         }
 
-        User user = new User(
-                0,
-                body.name(),
-                body.email(),
-                passwordEncoder.encode(body.password()),
-                body.role(),
-                null
-        );
+        User user = User.builder()
+                .name(body.name())
+                .email(body.email())
+                .password(passwordEncoder.encode(body.password()))
+                .role(body.role())
+                .build();
         User savedUser = userRepository.save(user);
 
         return new UserResponse(savedUser.getId(), savedUser.getName(), savedUser.getEmail(), null);
@@ -69,17 +67,15 @@ public class Service implements IService {
 
         String refreshToken = tokenService.generateRefreshToken();
 
-        Session session = new Session(
-                0,
-                user,
-                tokenService.hash(refreshToken),
-                LocalDateTime.now().plusHours(1),
-                false
-        );
+        Session session = Session.builder()
+                .user(user)
+                .token(tokenService.hash(refreshToken))
+                .expiryDate(LocalDateTime.now().plusHours(1))
+                .build();
         Session savedSession = sessionRepository.save(session);
 
         String accessToken = jwtService.generateToken(
-                user.getEmail(),
+                user.getId(),
                 user.getRole().name(),
                 savedSession.getId()
         );
@@ -92,11 +88,11 @@ public class Service implements IService {
         String hashedToken = tokenService.hash(refreshToken);
 
         Session session = sessionRepository.findByToken(hashedToken)
-                .orElseThrow(InvalidRefreshTokenException::new);
+                .orElseThrow(InvalidSessionException::new);
 
         if(session.isRevoked()
                 || session.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new InvalidRefreshTokenException();
+            throw new InvalidSessionException();
         }
 
         User user = session.getUser();
@@ -108,7 +104,7 @@ public class Service implements IService {
         Session savedSession = sessionRepository.save(session);
 
         String accessToken = jwtService.generateToken(
-                user.getEmail(),
+                user.getId(),
                 user.getRole().name(),
                 savedSession.getId()
         );
@@ -121,7 +117,7 @@ public class Service implements IService {
         String hashedToken = tokenService.hash(refreshToken);
 
         Session session = sessionRepository.findByToken(hashedToken)
-                .orElseThrow(InvalidRefreshTokenException::new);
+                .orElseThrow(InvalidSessionException::new);
         session.setRevoked(true);
         sessionRepository.save(session);
 
@@ -135,20 +131,38 @@ public class Service implements IService {
     }
 
     public AllUsersResponse getAllUsers() {
-        return new AllUsersResponse(userRepository.findAll());
+        return new AllUsersResponse(
+                userRepository.findAll().stream().map(user -> new UserResponse(
+                        user.getId(),
+                        user.getName(),
+                        user.getEmail(),
+                        user.getCart()
+                )).toList()
+        );
     }
 
     public ProductResponse createProduct(CreateProductRequest body) {
-        Product product = new Product(
-                0,
-                body.name(),
-                body.price(),
-                body.stock()
-        );
+        JwtUserPrincipal principal = (JwtUserPrincipal)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User user = userRepository.findById(principal.userId())
+                .orElseThrow(UserNotFoundException::new);
+
+        if(productRepository.existsProductsByName(body.name())) {
+            throw new ProductNameExistsException();
+        }
+
+        Product product = Product.builder()
+                .createdBy(user)
+                .name(body.name())
+                .price(body.price())
+                .stock(body.stock())
+                .build();
         Product savedProduct = productRepository.save(product);
 
         return new ProductResponse(
                 savedProduct.getId(),
+                savedProduct.getCreatedBy().getId(),
                 savedProduct.getName(),
                 savedProduct.getPrice(),
                 savedProduct.getStock()
@@ -159,13 +173,13 @@ public class Service implements IService {
         return new AllProductsResponse(productRepository.findAll());
     }
 
+    @Transactional
     public CartResponse addProductToCart(AddToCartRequest body) {
         JwtUserPrincipal principal = (JwtUserPrincipal)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        User user = userRepository.findByEmail(principal.getEmail())
+        User user = userRepository.findById(principal.userId())
                 .orElseThrow(UserNotFoundException::new);
-
 
         Product product = productRepository.findById(body.productId())
                 .orElseThrow(ProductNotFoundException::new);
@@ -174,14 +188,14 @@ public class Service implements IService {
             throw new InsufficientStockException(product.getStock());
         }
 
-        CartItem cartItem = new CartItem(
-                0,
-                user,
-                product,
-                body.quantity()
-        );
+        CartItem cartItem = CartItem.builder()
+                .user(user)
+                .product(product)
+                .quantity(body.quantity())
+                .build();
+        CartItem savedCartItem = cartItemRepository.save(cartItem);
 
-        user.addToCart(cartItem);
+        user.addToCart(savedCartItem);
         User savedUser = userRepository.save(user);
 
         return new CartResponse(

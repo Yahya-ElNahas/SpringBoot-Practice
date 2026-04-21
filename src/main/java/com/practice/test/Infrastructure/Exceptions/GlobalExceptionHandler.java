@@ -4,7 +4,6 @@ import com.practice.test.Dtos.Responses.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -39,8 +38,9 @@ public class GlobalExceptionHandler {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .toList();
+                .map(error ->
+                        error.getField() + ": " + error.getDefaultMessage()
+                ).toList();
 
         String errorMessage = String.join("; ", errors);
 
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Invalid enum value, role should be: 'USER' or 'ADMIN'",
+                messageSource.getMessage("invalid.role", null, LocaleContextHolder.getLocale()),
                 request.getRequestURI(),
                 LocalDateTime.now()
         );

@@ -1,3 +1,5 @@
 package com.practice.test.Dtos.Responses;
 
-public record ProductResponse(int id, String name, double price, int stock) {}
+import java.util.UUID;
+
+public record ProductResponse(UUID id, UUID createdBy, String name, double price, int stock) {}

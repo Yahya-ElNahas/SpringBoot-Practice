@@ -1,7 +1,9 @@
 package com.practice.test.Infrastructure.Jwt;
 
 import com.practice.test.Dtos.Responses.ErrorResponse;
-import com.practice.test.Entities.Session.Session;
+import com.practice.test.Entities.Session;
+import com.practice.test.Infrastructure.Exceptions.GeneralException;
+import com.practice.test.Infrastructure.Exceptions.InvalidSessionException;
 import com.practice.test.Repositories.SessionRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,6 +25,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -50,20 +54,20 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             jwtService.validateToken(token);
 
-            String email = jwtService.extractEmail(token);
+            UUID userId = jwtService.extractUserId(token);
             String role = jwtService.extractRole(token);
-            int sessionId = jwtService.extractSessionId(token);
+            UUID sessionId = jwtService.extractSessionId(token);
 
             Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(Exception::new);
+                    .orElseThrow(InvalidSessionException::new);
             if(session.isRevoked() || session.getExpiryDate().isBefore(LocalDateTime.now())
             ) {
-                throw new Exception();
+                throw new InvalidSessionException();
             }
 
             GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 
-            JwtUserPrincipal principal = new JwtUserPrincipal(email, sessionId, authority);
+            JwtUserPrincipal principal = new JwtUserPrincipal(userId, sessionId, authority);
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     principal,
@@ -76,23 +80,32 @@ public class JwtFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
+        } catch (GeneralException e) {
+            SecurityContextHolder.clearContext();
+            sendTokenError(request, response, e.getMessage());
+            return;
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
-            sendTokenError(request, response);
+            logger.error(e);
+            sendTokenError(request, response, null);
             return;
         }
+
         filterChain.doFilter(request, response);
     }
 
     private void sendTokenError(
             HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletResponse response,
+            String messageCode
     ) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         ErrorResponse errorResponse = new ErrorResponse(
-                401,
-                "Unauthorized",
-                "Invalid or expired token",
+                messageCode != null ? 401 : 500,
+                messageCode != null ? "Unauthorized" : "Internal server error",
+                messageCode != null ?
+                        messageSource.getMessage(messageCode, null, LocaleContextHolder.getLocale()) :
+                        null,
                 request.getRequestURI(),
                 LocalDateTime.now()
         );

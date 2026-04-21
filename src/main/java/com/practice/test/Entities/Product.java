@@ -1,19 +1,25 @@
-package com.practice.test.Entities.Product;
+package com.practice.test.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "products")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 @ToString
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne
+    private User createdBy;
 
     @Column(nullable = false, unique = true)
     private String name;

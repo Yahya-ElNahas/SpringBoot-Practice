@@ -10,10 +10,10 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Constraint(validatedBy = PasswordAnnotationValidator.class)
 public @interface Password {
-    String message() default "Invalid password";
+    String message() default "{invalid.password}";
 
-    int minLength() default 3;
-    int maxLength() default 12;
+    int min() default 3;
+    int max() default 12;
 
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

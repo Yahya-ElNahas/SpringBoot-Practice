@@ -1,9 +1,11 @@
 package com.practice.test.Dtos.Internal;
 
-import com.practice.test.Entities.Product.Product;
+import com.practice.test.Entities.Product;
+
+import java.util.UUID;
 
 public record CartItemResponse(
-        int id,
+        UUID id,
         Product product,
         int quantity
 ) {}

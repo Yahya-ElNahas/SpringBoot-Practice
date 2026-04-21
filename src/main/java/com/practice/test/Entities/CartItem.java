@@ -1,24 +1,24 @@
-package com.practice.test.Entities.Cart;
+package com.practice.test.Entities;
 
-import com.practice.test.Entities.Product.Product;
-import com.practice.test.Entities.User.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "cart_items")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 public class CartItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne
     private User user;

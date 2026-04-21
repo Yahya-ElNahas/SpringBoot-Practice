@@ -3,15 +3,21 @@ package com.practice.test.Infrastructure.Annotations.Validators;
 import com.practice.test.Infrastructure.Annotations.Password;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 
+@RequiredArgsConstructor
 public class PasswordAnnotationValidator implements ConstraintValidator<Password, String> {
 
-    private int minLength, maxLength;
+    private int min, max;
+
+    private final MessageSource messageSource;
 
     @Override
     public void initialize(Password constraintAnnotation) {
-        this.minLength = constraintAnnotation.minLength();
-        this.maxLength = constraintAnnotation.maxLength();
+        this.min = constraintAnnotation.min();
+        this.max = constraintAnnotation.max();
     }
 
     @Override
@@ -20,15 +26,17 @@ public class PasswordAnnotationValidator implements ConstraintValidator<Password
             return false;
         }
 
-        boolean isValid = value.length() >= minLength && value.length() <= maxLength;
-
+        boolean isValid = value.length() >= min && value.length() <= max;
         if(!isValid) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                    "Password must be between " + minLength + " and " + maxLength + " characters long"
+                    messageSource.getMessage(
+                            "invalid.password",
+                            new Object[]{min, max},
+                            LocaleContextHolder.getLocale()
+                    )
             ).addConstraintViolation();
         }
-
         return isValid;
     }
 }
