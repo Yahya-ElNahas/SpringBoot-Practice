@@ -34,19 +34,8 @@ public class User {
     private UserRole role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OrderBy("addedAt ASC")
     private List<CartItem> cart;
-
-    public void addToCart(CartItem cartItem) {
-        cart.add(cartItem);
-    }
-
-    public void removeFromCart(CartItem cartItem) {
-        cart.remove(cartItem);
-    }
-
-    public void clearCart() {
-        cart.clear();
-    }
 }
 
 //    @OneToOne(cascade = CascadeType.ALL)

@@ -59,7 +59,8 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                messageSource.getMessage("invalid.role", null, LocaleContextHolder.getLocale()),
+//                messageSource.getMessage("invalid.role", null, LocaleContextHolder.getLocale()),
+                ex.getMessage(),
                 request.getRequestURI(),
                 LocalDateTime.now()
         );

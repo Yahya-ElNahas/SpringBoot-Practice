@@ -15,7 +15,7 @@ public interface IService {
     AllUsersResponse getAllUsers(int pageNumber, int pageSize, String sortBy, String sortDirection);
 
     ProductResponse createProduct(CreateProductRequest body);
-    AllProductsResponse getAllProducts();
+    AllProductsResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortDirection);
 
     CartResponse addProductToCart(AddToCartRequest body);
 }

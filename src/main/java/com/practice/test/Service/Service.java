@@ -1,5 +1,6 @@
 package com.practice.test.Service;
 
+import com.practice.test.Dtos.DtoMapper;
 import com.practice.test.Dtos.Internal.AuthTokens;
 import com.practice.test.Dtos.Internal.CartItemResponse;
 import com.practice.test.Dtos.Requests.AddToCartRequest;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @org.springframework.stereotype.Service
 @AllArgsConstructor
@@ -42,6 +44,7 @@ public class Service implements IService {
     private final JwtService jwtService;
     private final TokenService tokenService;
 
+    private final DtoMapper dtoMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -58,7 +61,7 @@ public class Service implements IService {
                 .build();
         User savedUser = userRepository.save(user);
 
-        return new UserResponse(savedUser.getId(), savedUser.getName(), savedUser.getEmail(), null);
+        return dtoMapper.toUserResponse(savedUser);
     }
 
     @Transactional
@@ -132,7 +135,7 @@ public class Service implements IService {
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
-        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getCart());
+        return dtoMapper.toUserResponse(user);
     }
 
     public AllUsersResponse getAllUsers(
@@ -147,16 +150,12 @@ public class Service implements IService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<User> usersPage = userRepository.findAll(pageable);
 
-        List<UserResponse> userResponse = usersPage.getContent()
-                .stream().map(user -> new UserResponse(
-                        user.getId(),
-                        user.getName(),
-                        user.getEmail(),
-                        user.getCart()
-                )).toList();
+        List<UserResponse> userResponses = usersPage.getContent()
+                .stream().map(dtoMapper::toUserResponse
+                ).toList();
 
         return new AllUsersResponse(
-                userResponse,
+                userResponses,
                 usersPage.getNumber(),
                 usersPage.getSize(),
                 usersPage.getTotalElements(),
@@ -183,17 +182,37 @@ public class Service implements IService {
                 .build();
         Product savedProduct = productRepository.save(product);
 
-        return new ProductResponse(
-                savedProduct.getId(),
-                savedProduct.getCreatedBy().getId(),
-                savedProduct.getName(),
-                savedProduct.getPrice(),
-                savedProduct.getStock()
-        );
+        return dtoMapper.toProductResponse(savedProduct);
     }
 
-    public AllProductsResponse getAllProducts() {
-        return new AllProductsResponse(productRepository.findAll());
+    public AllProductsResponse getAllProducts(
+            int pageNumber,
+            int pageSize,
+            String sortBy,
+            String sortDirection
+    ) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<Product> productPage = productRepository.findAll(pageable);
+
+        List<ProductResponse> productResponses = productPage.getContent()
+                .stream().map(product -> new ProductResponse(
+                        product.getId(),
+                        product.getCreatedBy().getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getStock()
+                )).toList();
+
+        return new AllProductsResponse(
+                productResponses,
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages()
+        );
     }
 
     @Transactional
@@ -201,35 +220,36 @@ public class Service implements IService {
         JwtUserPrincipal principal = (JwtUserPrincipal)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        User user = userRepository.findById(principal.userId())
-                .orElseThrow(UserNotFoundException::new);
+        UUID userId = principal.userId();
 
         Product product = productRepository.findById(body.productId())
                 .orElseThrow(ProductNotFoundException::new);
 
-        if(body.quantity() > product.getStock()) {
+        CartItem cartItem = cartItemRepository.findCartItemByUserIdAndProductId(userId, product.getId())
+                .orElse(null);
+
+        int totalQuantity = cartItem != null ?
+                body.quantity() + cartItem.getQuantity() :
+                body.quantity();
+
+        if(totalQuantity > product.getStock()) {
             throw new InsufficientStockException(product.getStock());
         }
 
-        CartItem cartItem = CartItem.builder()
-                .user(user)
-                .product(product)
-                .quantity(body.quantity())
-                .build();
-        CartItem savedCartItem = cartItemRepository.save(cartItem);
+        if(cartItem != null) {
+            cartItem.setQuantity(totalQuantity);
+        } else {
+            cartItem = CartItem.builder()
+                    .user(userRepository.getReferenceById(userId))
+                    .product(product)
+                    .quantity(totalQuantity)
+                    .build();
+        }
+        cartItemRepository.save(cartItem);
 
-        user.addToCart(savedCartItem);
-        User savedUser = userRepository.save(user);
+        List<CartItemResponse> cart = dtoMapper.toCartItemListResponse(cartItemRepository.findAllByUserId(userId));
 
-        return new CartResponse(
-                savedUser.getCart().stream().map(
-                        item -> new CartItemResponse(
-                            item.getId(),
-                            item.getProduct(),
-                            item.getQuantity()
-                        )
-                ).toList()
-        );
+        return new CartResponse(cart);
     }
 }
 

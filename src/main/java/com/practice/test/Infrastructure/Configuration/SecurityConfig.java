@@ -33,8 +33,8 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/auth/**").permitAll()
-                                .requestMatchers("/users/**", "/products/**").hasAnyRole(
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/api/v1//users/**", "/api/v1//products/**").hasAnyRole(
                                         UserRole.USER.name(),
                                         UserRole.ADMIN.name()
                                 )

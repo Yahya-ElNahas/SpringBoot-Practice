@@ -1,15 +1,18 @@
 package com.practice.test.Entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "cart_items")
+@Table(
+        name = "cart_items",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "product_id"})
+        }
+)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -21,10 +24,20 @@ public class CartItem {
     private UUID id;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
+    @Setter
     private int quantity;
+
+    private LocalDateTime addedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.addedAt = LocalDateTime.now();
+    }
 }

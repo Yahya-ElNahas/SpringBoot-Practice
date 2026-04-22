@@ -11,7 +11,6 @@ import com.practice.test.Service.IService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,86 +24,97 @@ public class Controller {
     private final CookieService cookieService;
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<@NonNull UserResponse> createUser(
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(
             @Valid @RequestBody CreateUserRequest createUserRequestBody
     ) {
         UserResponse result = service.createUser(createUserRequestBody);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.success("User created", result));
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<@NonNull AuthResponse> login(
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest loginRequestBody,
             HttpServletResponse response
     ) {
         AuthTokens tokens = service.login(loginRequestBody);
         cookieService.createRefreshTokenCookie(response, tokens.refreshToken());
-        return ResponseEntity.ok(new AuthResponse(tokens.accessToken()));
+        return ResponseEntity.ok(ApiResponse.success(
+                "Logged in",
+                new AuthResponse(tokens.accessToken()))
+        );
     }
 
     @PostMapping("/auth/refreshToken")
-    public ResponseEntity<@NonNull AuthResponse> refreshToken(
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
             @CookieValue(name = "refresh_token") String refreshToken,
             HttpServletResponse response
     ) {
         AuthTokens tokens = service.refreshAccessToken(refreshToken);
         cookieService.createRefreshTokenCookie(response, tokens.refreshToken());
-        return ResponseEntity.ok(new AuthResponse(tokens.accessToken()));
+        return ResponseEntity.ok(ApiResponse.success(
+                "Token refreshed",
+                new AuthResponse(tokens.accessToken()))
+        );
     }
 
     @PostMapping("/auth/logout")
-    public ResponseEntity<@NonNull String> logout(
+    public ResponseEntity<ApiResponse<String>> logout(
             @CookieValue(name = "refresh_token") String refreshToken
     ) {
         String result = service.logout(refreshToken);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.success(result, null));
     }
 
     @GetMapping(value = "/users", params = "email")
-    public ResponseEntity<@NonNull UserResponse> getUserByEmail(
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByEmail(
             @RequestParam(name = "email") String email
     ) {
         UserResponse result = service.getUserByEmail(email);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @GetMapping("/users")
-    public ResponseEntity<@NonNull AllUsersResponse> AllUsers(
+    public ResponseEntity<ApiResponse<AllUsersResponse>> AllUsers(
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "5") int pageSize,
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         AllUsersResponse result = service.getAllUsers(pageNumber, pageSize,  sortBy, sortDirection);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products")
-    public ResponseEntity<@NonNull ProductResponse> createProduct(
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
             @RequestBody CreateProductRequest createProductRequestBody
     ) {
         ProductResponse result = service.createProduct(createProductRequestBody);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(ApiResponse.success("Product created", result));
     }
 
     @GetMapping("/products")
-    public ResponseEntity<@NonNull AllProductsResponse> getAllProducts() {
-        AllProductsResponse result = service.getAllProducts();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<ApiResponse<AllProductsResponse>> getAllProducts(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "5") int pageSize,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection
+    ) {
+        AllProductsResponse result = service.getAllProducts(pageNumber, pageSize,  sortBy, sortDirection);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PostMapping("/cart/item")
-    public ResponseEntity<@NonNull CartResponse> addProductToCart(
+    public ResponseEntity<ApiResponse<CartResponse>> addProductToCart(
             @RequestBody AddToCartRequest addToCartRequestBody
     ) {
-        CartResponse response = service.addProductToCart(addToCartRequestBody);
-        return ResponseEntity.ok(response);
+        CartResponse result = service.addProductToCart(addToCartRequestBody);
+        return ResponseEntity.ok(ApiResponse.success("Product added to cart", result));
     }
 }
 
 //    @PostMapping("/users/updateAddress")
-//    public ResponseEntity<@NonNull UserResponse> updateUserAddress(
+//    public ResponseEntity<UserResponse> updateUserAddress(
 //            @RequestBody UpdateUserAddressRequest updateUserAddressRequestBody
 //    ) {
 //        UserResponse result = service.updateUserAddress(updateUserAddressRequestBody);
@@ -113,7 +123,7 @@ public class Controller {
 
 //    @PreAuthorize("hasRole('ADMIN')")
 //    @PostMapping("/products/createTable")
-//    public ResponseEntity<@NonNull String> createProductsTable() {
+//    public ResponseEntity<String> createProductsTable() {
 //        String result = service.createProductsTable();
 //        return ResponseEntity.ok(result);
 //    }

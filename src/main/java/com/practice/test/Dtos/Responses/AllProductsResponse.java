@@ -4,4 +4,10 @@ import com.practice.test.Entities.Product;
 
 import java.util.List;
 
-public record AllProductsResponse(List<Product> products) {}
+public record AllProductsResponse(
+        List<ProductResponse> products,
+        int page,
+        int size,
+        long totalProducts,
+        int totalPages
+) {}
