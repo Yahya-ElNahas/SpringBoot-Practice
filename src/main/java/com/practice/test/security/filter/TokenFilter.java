@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.MDC;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -109,7 +110,9 @@ public class TokenFilter extends OncePerRequestFilter {
                 messageCode != null ?
                         messageSource.getMessage(messageCode, null, LocaleContextHolder.getLocale()) :
                         null,
+                null,
                 request.getRequestURI(),
+                MDC.get("requestId"),
                 LocalDateTime.now()
         );
 
