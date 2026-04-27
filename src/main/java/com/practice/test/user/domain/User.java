@@ -1,10 +1,8 @@
 package com.practice.test.user.domain;
 
-import com.practice.test.cart.domain.CartItem;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -32,10 +30,6 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @OrderBy("addedAt ASC")
-    private List<CartItem> cart;
 }
 
 //    @OneToOne(cascade = CascadeType.ALL)
