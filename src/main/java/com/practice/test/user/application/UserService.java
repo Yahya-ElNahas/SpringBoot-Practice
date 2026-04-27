@@ -5,7 +5,7 @@ import com.practice.test.user.Infrastructure.UserRepository;
 import com.practice.test.user.domain.User;
 import com.practice.test.user.application.dto.response.AllUsersResponse;
 import com.practice.test.user.application.dto.response.UserResponse;
-import com.practice.test.common.exception.UserNotFoundException;
+import com.practice.test.user.application.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,8 +42,7 @@ public class UserService {
         Page<User> usersPage = userRepository.findAll(pageable);
 
         List<UserResponse> userResponses = usersPage.getContent()
-                .stream().map(userMapper::toUserResponse
-                ).toList();
+                .stream().map(userMapper::toUserResponse).toList();
 
         return new AllUsersResponse(
                 userResponses,

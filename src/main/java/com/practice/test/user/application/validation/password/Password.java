@@ -1,4 +1,4 @@
-package com.practice.test.common.validation.password;
+package com.practice.test.user.application.validation.password;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

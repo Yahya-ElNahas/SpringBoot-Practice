@@ -1,6 +1,5 @@
 package com.practice.test.security.token;
 
-import com.practice.test.common.exception.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -13,7 +12,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service
-public class TokenService {
+public class AccessTokenService {
 
     @Value("${jwt.secret}")
     private String SECRET;
@@ -33,16 +32,12 @@ public class TokenService {
                 .compact();
     }
 
-    public Claims validateToken(String token) throws InvalidTokenException{
-        try {
-            return Jwts.parser()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (Exception e) {
-            throw new InvalidTokenException();
-        }
+    public Claims validateToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public UUID extractUserId(Claims claims) {

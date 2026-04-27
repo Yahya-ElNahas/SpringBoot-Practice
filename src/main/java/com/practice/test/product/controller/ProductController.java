@@ -5,14 +5,18 @@ import com.practice.test.product.application.dto.request.CreateProductRequest;
 import com.practice.test.product.application.dto.response.AllProductsResponse;
 import com.practice.test.common.response.ApiResponse;
 import com.practice.test.product.application.dto.response.ProductResponse;
+import com.practice.test.security.principal.UserPrincipal;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
+@Tag(name = "03 - Product Controller")
 public class ProductController {
 
     private final ProductService productService;
@@ -20,9 +24,10 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody CreateProductRequest createProductRequestBody
     ) {
-        ProductResponse result = productService.createProduct(createProductRequestBody);
+        ProductResponse result = productService.createProduct(userPrincipal, createProductRequestBody);
         return ResponseEntity.ok(ApiResponse.success("Product created", result));
     }
 

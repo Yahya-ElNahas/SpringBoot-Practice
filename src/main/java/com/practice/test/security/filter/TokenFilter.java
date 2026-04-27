@@ -1,11 +1,9 @@
 package com.practice.test.security.filter;
 
-import com.practice.test.common.response.ErrorResponse;
 import com.practice.test.authentication.domain.Session;
-import com.practice.test.common.exception.GeneralException;
-import com.practice.test.common.exception.InvalidSessionException;
+import com.practice.test.authentication.application.exception.InvalidSessionException;
 import com.practice.test.authentication.infrastructure.SessionRepository;
-import com.practice.test.security.token.TokenService;
+import com.practice.test.security.token.AccessTokenService;
 import com.practice.test.security.principal.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -13,10 +11,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
-import org.slf4j.MDC;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -35,20 +28,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TokenFilter extends OncePerRequestFilter {
 
-    private final TokenService tokenService;
+    private final AccessTokenService accessTokenService;
     private final SessionRepository sessionRepository;
-
-    private final MessageSource messageSource;
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
     ) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            SecurityContextHolder.clearContext();
             filterChain.doFilter(request, response);
             return;
         }
@@ -56,11 +48,11 @@ public class TokenFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            Claims claims = tokenService.validateToken(token);
+            Claims claims = accessTokenService.validateToken(token);
 
-            UUID userId = tokenService.extractUserId(claims);
-            String role = tokenService.extractRole(claims);
-            UUID sessionId = tokenService.extractSessionId(claims);
+            UUID userId = accessTokenService.extractUserId(claims);
+            String role = accessTokenService.extractRole(claims);
+            UUID sessionId = accessTokenService.extractSessionId(claims);
 
             Session session = sessionRepository.findById(sessionId)
                     .orElseThrow(InvalidSessionException::new);
@@ -84,40 +76,12 @@ public class TokenFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-        } catch (GeneralException e) {
-            SecurityContextHolder.clearContext();
-            sendTokenError(request, response, e.getMessage());
-            return;
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
-            logger.error(e);
-            sendTokenError(request, response, null);
-            return;
+
+            logger.warn(e.getMessage());
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private void sendTokenError(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            String messageCode
-    ) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ErrorResponse errorResponse = new ErrorResponse(
-                messageCode != null ? 401 : 500,
-                messageCode != null ? "Unauthorized" : "Internal server error",
-                messageCode != null ?
-                        messageSource.getMessage(messageCode, null, LocaleContextHolder.getLocale()) :
-                        null,
-                null,
-                request.getRequestURI(),
-                MDC.get("requestId"),
-                LocalDateTime.now()
-        );
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

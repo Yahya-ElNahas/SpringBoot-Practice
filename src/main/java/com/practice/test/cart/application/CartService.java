@@ -1,19 +1,18 @@
 package com.practice.test.cart.application;
 
+import com.practice.test.cart.application.exception.CartItemProductNotFoundException;
 import com.practice.test.cart.domain.CartItem;
 import com.practice.test.cart.infrastructure.CartItemRepository;
 import com.practice.test.cart.application.dto.CartMapper;
 import com.practice.test.cart.application.dto.response.CartItemResponse;
 import com.practice.test.cart.application.dto.request.AddToCartRequest;
 import com.practice.test.cart.application.dto.response.CartResponse;
-import com.practice.test.common.exception.InsufficientStockException;
-import com.practice.test.common.exception.ProductNotFoundException;
+import com.practice.test.cart.application.exception.InsufficientStockException;
 import com.practice.test.security.principal.UserPrincipal;
 import com.practice.test.product.domain.Product;
 import com.practice.test.product.infrastructure.ProductRepository;
 import com.practice.test.user.Infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,14 +30,11 @@ public class CartService {
     private final CartMapper cartMapper;
 
     @Transactional
-    public CartResponse addProductToCart(AddToCartRequest body) {
-        UserPrincipal principal = (UserPrincipal)
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        UUID userId = principal.userId();
+    public CartResponse addProductToCart(UserPrincipal userPrincipal, AddToCartRequest body) {
+        UUID userId = userPrincipal.userId();
 
         Product product = productRepository.findById(body.productId())
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(() -> new CartItemProductNotFoundException(body.productId()));
 
         CartItem cartItem = cartItemRepository.findCartItemByUserIdAndProductId(userId, product.getId())
                 .orElse(null);
@@ -62,8 +58,20 @@ public class CartService {
         }
         cartItemRepository.save(cartItem);
 
-        List<CartItemResponse> cart = cartMapper.toCartItemListResponse(cartItemRepository.findAllByUserId(userId));
+        List<CartItem> cart = cartItemRepository.findAllByUserId(userId);
 
-        return new CartResponse(cart);
+        List<CartItemResponse> cartResponse = cartMapper.toCartItemListResponse(cart);
+
+        return new CartResponse(cartResponse);
+    }
+
+    public CartResponse getCart(UserPrincipal userPrincipal) {
+        UUID userId = userPrincipal.userId();
+
+        List<CartItem> cart = cartItemRepository.findAllByUserId(userId);
+
+        List<CartItemResponse> cartResponse = cartMapper.toCartItemListResponse(cart);
+
+        return new CartResponse(cartResponse);
     }
 }

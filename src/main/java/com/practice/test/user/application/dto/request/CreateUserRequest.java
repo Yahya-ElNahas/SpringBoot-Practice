@@ -1,7 +1,7 @@
 package com.practice.test.user.application.dto.request;
 
 import com.practice.test.user.domain.UserRole;
-import com.practice.test.common.validation.password.Password;
+import com.practice.test.user.application.validation.password.Password;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

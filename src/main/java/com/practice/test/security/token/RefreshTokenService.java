@@ -1,4 +1,4 @@
-package com.practice.test.common.util;
+package com.practice.test.security.token;
 
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 
 @Component
-public class RefreshTokenUtil {
+public class RefreshTokenService {
 
     public String generateRefreshToken() {
         SecureRandom secureRandom = new SecureRandom();

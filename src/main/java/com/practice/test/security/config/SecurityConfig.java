@@ -1,8 +1,9 @@
 package com.practice.test.security.config;
 
+import com.practice.test.security.handler.AccessDeniedHandler;
+import com.practice.test.security.handler.UnauthorizedHandler;
 import com.practice.test.user.domain.UserRole;
 import com.practice.test.security.filter.TokenFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,9 @@ public class SecurityConfig {
 
     private final TokenFilter tokenFilter;
 
+    private final AccessDeniedHandler accessDeniedHandler;
+    private final UnauthorizedHandler unauthorizedHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         httpSecurity
@@ -38,20 +42,15 @@ public class SecurityConfig {
                                         UserRole.USER.name(),
                                         UserRole.ADMIN.name()
                                 )
-                                .requestMatchers("/h2-console/**").permitAll()
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 .requestMatchers("/error").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint((
-                            (request, response, authException) ->
-                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)
-                        )).accessDeniedHandler(
-                                (request, response, authException) ->
-                                        response.setStatus(HttpServletResponse.SC_FORBIDDEN)
-                        )
+                .exceptionHandling(e -> e
+                                .authenticationEntryPoint(unauthorizedHandler)
+                                .accessDeniedHandler(accessDeniedHandler)
                 );
 
         return httpSecurity.build();

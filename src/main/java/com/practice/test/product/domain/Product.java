@@ -1,6 +1,5 @@
 package com.practice.test.product.domain;
 
-import com.practice.test.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,8 +18,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    private User createdBy;
+    private UUID createdBy;
 
     @Column(nullable = false, unique = true)
     private String name;
