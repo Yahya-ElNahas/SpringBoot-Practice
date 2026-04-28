@@ -3,6 +3,7 @@ package com.practice.test.localization.application;
 import com.practice.test.localization.domain.Localization;
 import com.practice.test.localization.infrastructure.LocalizationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -15,18 +16,17 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class DatabaseMessageSource implements MessageSource {
 
-    private final LocalizationRepository localizationRepo;
+    private final LocalizationCacheService service;
 
     @Override
+    @Cacheable(value = "localization", key = "#code + '_' + (#locale != null ? #locale.getLanguage() : 'en')")
     public String getMessage(
             String code,
             Object [] args,
             Locale locale
     ) throws NoSuchMessageException {
         String language = locale != null ? locale.getLanguage() : "en";
-        String message = localizationRepo.findByCodeAndLanguage(code, language)
-                .map(Localization::getMessage)
-                .orElse(code);
+        String message = service.getMessage(code, language);
 
         return format(message, args);
     }

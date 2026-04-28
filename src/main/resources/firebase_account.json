@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "springboot-practice-d7e9c",
+  "private_key_id": "455be0b8f72d3828c2bdf15e008a5f63724ee851",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDk+MHnW8nUAHh0\npFlV8zb7eENTwUzEOl3NlTv0IfdxttSpyoeJS6vSWlNJPeo+QhMVEcVCIdy3HpSL\nVN83EFLgavP5KPcgMLeQ1mRxQr4WSw3XA5SKMcfoUZOcrWj3f/rMb6/9K5uHKmnC\n6THvN9h0Dr2zQFHYmcJ+R1ZqipfmNoxMnoDUof8VUdvL//X/IkBbN0htKLqHaaQU\nqrO5uIvavLh/hNDSvOBfk0DxaXyqkb70fZjMtUV/Ws37L/4wb6x44lcw28GSkmHC\nIrHmR81EF6W8H6NH/vnm5Kx1rnDKPI556BMrF/YCsnbhka9uo23Cyw5enCCnMy6G\nS+bOzHpfAgMBAAECggEAC3fkKmTgCoTNg7YZnWL1rYm8AY1sfWWY/iuL2bH71U+9\nfhWdTUSjggExK7l0qpKfpw4BTcspZWicMxBYr8bbB8+Dkca5/fxCrXf3hu67W519\nv3e38GYG571yQcYzvDXGR4gOjgUpoI8Axhjs/djTuBhm6vv9PXaSFcYX73Uqn4ai\npSWb8K4KKBPHNTw2EYbT2FW280ozhS3t5ePO6s738hiNUvhRIJ28Hw7kF0+wcYGc\nzZtwnoVhjpw9nakgT8Rjphv1WJIld4vGXnY4xJnYAIBKLO712+lfFJIqQRSD3+qB\n9Nx0+zEQudj3iHilMI2PGiSGnJY7w09StWO0m+ukDQKBgQD3TsoSUyRf35/aStDT\nr6uUH/ZU42jPeE/W0tWNBUac0CVOzu7rS7km9SYX3pjydN85dznritwM0VZF12Vz\n15+MTMEVFVpbT+fskRnJF1uUOswtj1Gkgj13ypxduZ8I1QB1k87Kwp13tmC2B4V4\npriSd2ckPNB7+iWHSdEZsHuKjQKBgQDtBPwpEqFkjXo4pF0VxknWwxFHEHblYATH\nEjQ8OIdmZiavfRAFMkA5uW271WpGp96PsFQTbSHwvDo/sgZcQ3edRHRICEgdA2/H\nBdxSEZhMWcvJgCAsVAeLFXByW0scRlBYbm5NsyZPbu57cjDlOkT2EW8qCRW+rps9\n0SxOGluzmwKBgBy7XKKwYiN5WZsE4ioV2LtG01mdagngknYE3KabnE6PqCX1yLAx\nhftOs/RF+kMA7QZCIcqJwXMDxyAqHDFPNcwZBr2qU2sUZ3+GhBZmzk70XdBVPEj+\nkKGgOnZxIFboWDtQxs+ruJu15pp/WTRhOkRZ9vOw1Q/ySfXjz5VKea/pAoGBANRw\n9GcICNqsqFDemYRrz0EMZI8Spc7f6khX+7PCYzIX+zKt4M8XhFN47W8/UVt1GVon\nDKTA23v/6iGvOl42Jp8yfRsXOTOwId78VMbGeIBut+aqzauNwZkbJUeKpl74cwlg\nKcPBAGSQJHdHGaZMPQVlCQNfUzsvG3wj4Rc8LtdjAoGBAJ3saD4w5qiY4Z6VHYxk\nsYwf+Y+of4gAWSuUviZL23EgcqrK+dAnqp/0CUsGSVpyVKvudbFl5pqizqpD349S\nzv1v59frSZQsRu1IalcfUN2pDYgUJPsZuBfy3ky3+ekJMJ3ZH4pjGfsdRss/GBi6\nWSILOFGMWIuQWwwscSfg5Cgw\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@springboot-practice-d7e9c.iam.gserviceaccount.com",
+  "client_id": "107510256006019145138",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40springboot-practice-d7e9c.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

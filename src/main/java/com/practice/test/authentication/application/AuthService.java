@@ -8,23 +8,26 @@ import com.practice.test.user.application.dto.UserMapper;
 import com.practice.test.user.application.dto.request.CreateUserRequest;
 import com.practice.test.authentication.application.dto.request.LoginRequest;
 import com.practice.test.user.application.dto.response.UserResponse;
-import com.practice.test.user.application.exception.EmailExistsException;
-import com.practice.test.user.application.exception.IncorrectCredentialsException;
+import com.practice.test.authentication.application.exception.EmailAlreadyExistsException;
+import com.practice.test.authentication.application.exception.IncorrectCredentialsException;
 import com.practice.test.authentication.application.exception.InvalidSessionException;
 import com.practice.test.user.domain.User;
 import com.practice.test.user.Infrastructure.UserRepository;
 import com.practice.test.security.token.AccessTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
 public class AuthService {
 
@@ -37,10 +40,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+    @Value("${auth.refresh-token.expiry-hours}")
+    private int refreshTokenExpiryHours;
+
+    @Transactional
     public UserResponse createUser(CreateUserRequest body) {
-        if(userRepository.existsByEmail(body.email())) {
-            throw new EmailExistsException();
-        }
 
         User user = User.builder()
                 .name(body.name())
@@ -48,13 +52,18 @@ public class AuthService {
                 .password(passwordEncoder.encode(body.password()))
                 .role(body.role())
                 .build();
-        User savedUser = userRepository.save(user);
+        try {
+            User savedUser = userRepository.save(user);
 
-        log.info("User created: id={} | email={}", savedUser.getId(), savedUser.getEmail());
+            log.info("User created: id={} | email={}", savedUser.getId(), savedUser.getEmail());
 
-        return userMapper.toUserResponse(savedUser);
+            return userMapper.toUserResponse(savedUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailAlreadyExistsException();
+        }
     }
 
+    @Transactional
     public AuthTokens login(LoginRequest body) {
         User user = userRepository.findByEmail(body.email())
                 .orElseThrow(IncorrectCredentialsException::new);
@@ -68,11 +77,14 @@ public class AuthService {
         String refreshToken = refreshTokenService.generateRefreshToken();
 
         Session session = Session.builder()
-                .user(user)
+                .userId(user.getId())
+                .userRole(user.getRole().name())
                 .token(refreshTokenService.hash(refreshToken))
-                .expiryDate(LocalDateTime.now().plusHours(1))
+                .expiryDate(Instant.now().plus(refreshTokenExpiryHours, ChronoUnit.HOURS))
                 .build();
         Session savedSession = sessionRepository.save(session);
+
+        sessionRepository.revokeAllByUserIdExcept(user.getId(), savedSession.getId());
 
         String accessToken = accessTokenService.generateToken(
                 user.getId(),
@@ -83,34 +95,37 @@ public class AuthService {
         return new AuthTokens(accessToken, refreshToken);
     }
 
+    @Transactional
     public AuthTokens refreshAccessToken(String refreshToken) {
         String hashedToken = refreshTokenService.hash(refreshToken);
 
         Session session = sessionRepository.findByToken(hashedToken)
                 .orElseThrow(InvalidSessionException::new);
 
-        if(session.isRevoked()
-                || session.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if(session.isRevoked() || session.getExpiryDate().isBefore(Instant.now())) {
             throw new InvalidSessionException();
         }
 
-        User user = session.getUser();
+        UUID userId = session.getUserId();
+
+        sessionRepository.revokeAllByUserIdExcept(userId, session.getId());
 
         String newRefreshToken = refreshTokenService.generateRefreshToken();
 
         session.setToken(refreshTokenService.hash(newRefreshToken));
-        session.setExpiryDate(LocalDateTime.now().plusHours(1));
+        session.setExpiryDate(Instant.now().plus(refreshTokenExpiryHours, ChronoUnit.HOURS));
         Session savedSession = sessionRepository.save(session);
 
         String accessToken = accessTokenService.generateToken(
-                user.getId(),
-                user.getRole().name(),
+                userId,
+                session.getUserRole(),
                 savedSession.getId()
         );
 
         return new AuthTokens(accessToken, newRefreshToken);
     }
 
+    @Transactional
     public void logout(String refreshToken) {
         String hashedToken = refreshTokenService.hash(refreshToken);
 

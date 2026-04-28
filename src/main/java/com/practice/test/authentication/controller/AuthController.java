@@ -3,6 +3,7 @@ package com.practice.test.authentication.controller;
 import com.practice.test.authentication.application.AuthService;
 import com.practice.test.authentication.application.exception.InvalidTokenException;
 import com.practice.test.authentication.application.dto.response.AuthTokens;
+import com.practice.test.security.principal.UserPrincipal;
 import com.practice.test.user.application.dto.request.CreateUserRequest;
 import com.practice.test.authentication.application.dto.request.LoginRequest;
 import com.practice.test.common.response.ApiResponse;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

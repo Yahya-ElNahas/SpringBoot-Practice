@@ -1,10 +1,10 @@
 package com.practice.test.cart.domain;
 
 import com.practice.test.product.domain.Product;
-import com.practice.test.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,21 +25,20 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @Setter
     private int quantity;
 
-    private LocalDateTime addedAt;
+    private Instant addedAt;
 
     @PrePersist
     public void prePersist() {
-        this.addedAt = LocalDateTime.now();
+        this.addedAt = Instant.now();
     }
 }

@@ -37,7 +37,7 @@ public class UserService {
             String sortDirection
     ) {
         Set<String> ALLOWED_SORT_FIELDS = Set.of("name", "email");
-        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy.toLowerCase())) {
             sortBy = "name";
         }
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ?

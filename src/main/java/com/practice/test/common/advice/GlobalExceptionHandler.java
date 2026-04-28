@@ -2,7 +2,9 @@ package com.practice.test.common.advice;
 
 import com.practice.test.common.exception.DomainException;
 import com.practice.test.common.response.ErrorResponse;
+import com.practice.test.security.handler.AccessDeniedHandler;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -11,12 +13,13 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,8 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
+
+    private final AccessDeniedHandler accessDeniedHandler;
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleCodedExceptions(DomainException e, HttpServletRequest request) {
@@ -40,7 +45,7 @@ public class GlobalExceptionHandler {
                 null,
                 request.getRequestURI(),
                 MDC.get("requestId"),
-                LocalDateTime.now()
+                Instant.now()
         ));
     }
 
@@ -66,7 +71,7 @@ public class GlobalExceptionHandler {
                 errors,
                 request.getRequestURI(),
                 MDC.get("requestId"),
-                LocalDateTime.now()
+                Instant.now()
         ));
     }
 
@@ -83,22 +88,30 @@ public class GlobalExceptionHandler {
                 null,
                 request.getRequestURI(),
                 MDC.get("requestId"),
-                LocalDateTime.now()
+                Instant.now()
         ));
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<ErrorResponse> handleUnknownException(Exception e, HttpServletRequest request) {
-//        log.error(e.getMessage(), e);
-//
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
-//                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-//                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-//                "Something went wrong",
-//                null,
-//                request.getRequestURI(),
-//                MDC.get("requestId"),
-//                LocalDateTime.now()
-//        ));
-//    }
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public void handleAccessDeniedException(AuthorizationDeniedException e,
+                                                                     HttpServletRequest request,
+                                                                     HttpServletResponse response
+    ) throws Exception {
+        accessDeniedHandler.handle(request, response, e);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnknownException(Exception e, HttpServletRequest request) {
+        log.error(e.getMessage(), e);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                e.getMessage(),
+                null,
+                request.getRequestURI(),
+                MDC.get("requestId"),
+                Instant.now()
+        ));
+    }
 }

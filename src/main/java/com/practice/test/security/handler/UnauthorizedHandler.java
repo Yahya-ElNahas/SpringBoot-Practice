@@ -13,7 +13,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Slf4j
 @Component
@@ -35,7 +35,7 @@ public class UnauthorizedHandler implements AuthenticationEntryPoint {
                 null,
                 request.getRequestURI(),
                 MDC.get("requestId"),
-                LocalDateTime.now()
+                Instant.now()
         );
 
         log.warn(error.error(), error);

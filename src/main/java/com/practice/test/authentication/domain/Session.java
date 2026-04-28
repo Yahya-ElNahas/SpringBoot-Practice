@@ -1,10 +1,9 @@
 package com.practice.test.authentication.domain;
 
-import com.practice.test.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -19,9 +18,11 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
     @Setter
-    private User user;
+    private UUID userId;
+
+    @Setter
+    private String userRole;
 
     @Column(nullable = false, unique = true)
     @Setter
@@ -29,7 +30,7 @@ public class Session {
 
     @Column(name = "expiry_date", nullable = false)
     @Setter
-    private LocalDateTime expiryDate;
+    private Instant expiryDate;
 
     @Setter
     private boolean revoked = false;

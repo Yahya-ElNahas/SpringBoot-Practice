@@ -11,7 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
                 null,
                 request.getRequestURI(),
                 MDC.get("requestId"),
-                LocalDateTime.now()
+                Instant.now()
         );
 
         responseWriter.write(error, HttpStatus.FORBIDDEN, response);

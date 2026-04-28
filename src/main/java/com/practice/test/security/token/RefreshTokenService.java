@@ -1,6 +1,6 @@
 package com.practice.test.security.token;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,7 +8,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HexFormat;
 
-@Component
+@Service
 public class RefreshTokenService {
 
     public String generateRefreshToken() {

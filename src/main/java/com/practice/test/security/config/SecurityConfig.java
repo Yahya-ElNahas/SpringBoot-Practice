@@ -5,6 +5,7 @@ import com.practice.test.security.handler.UnauthorizedHandler;
 import com.practice.test.user.domain.UserRole;
 import com.practice.test.security.filter.TokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -19,9 +20,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
+@EnableCaching
 public class SecurityConfig {
 
     private final TokenFilter tokenFilter;
@@ -38,15 +40,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/auth/**").permitAll()
-                                .requestMatchers("/users/**", "/products/**").hasAnyRole(
-                                        UserRole.USER.name(),
-                                        UserRole.ADMIN.name()
-                                )
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .requestMatchers("/users/**", "/products/**").authenticated()
+
                                 .requestMatchers("/error").permitAll()
+
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
                                 .anyRequest().authenticated()
                 )
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
                                 .authenticationEntryPoint(unauthorizedHandler)

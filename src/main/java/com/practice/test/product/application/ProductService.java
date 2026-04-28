@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -50,6 +51,10 @@ public class ProductService {
             String sortBy,
             String sortDirection
     ) {
+        Set<String> ALLOWED_SORT_FIELDS = Set.of("name", "price", "stock");
+        if(!ALLOWED_SORT_FIELDS.contains(sortBy.toLowerCase())) {
+            sortBy = "name";
+        }
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();

@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,12 +21,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TokenFilter extends OncePerRequestFilter {
 
     private final AccessTokenService accessTokenService;
@@ -56,7 +58,7 @@ public class TokenFilter extends OncePerRequestFilter {
 
             Session session = sessionRepository.findById(sessionId)
                     .orElseThrow(InvalidSessionException::new);
-            if(session.isRevoked() || session.getExpiryDate().isBefore(LocalDateTime.now())
+            if(session.isRevoked() || session.getExpiryDate().isBefore(Instant.now())
             ) {
                 throw new InvalidSessionException();
             }
@@ -79,7 +81,7 @@ public class TokenFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
 
-            logger.warn(e.getMessage());
+            log.warn("Token validation failed: {} - {}", e.getClass().getSimpleName(), e.getMessage());
         }
 
         filterChain.doFilter(request, response);

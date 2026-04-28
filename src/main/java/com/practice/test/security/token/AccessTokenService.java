@@ -2,6 +2,7 @@ package com.practice.test.security.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +18,11 @@ public class AccessTokenService {
     @Value("${jwt.secret}")
     private String SECRET;
 
+    @Value("${auth.access-token.expiry-minutes}")
+    private long tokenExpiryMinutes;
+
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET));
     }
 
     public String generateToken(UUID userId, String role, UUID sessionId) {
@@ -27,7 +31,7 @@ public class AccessTokenService {
                 .claim("role", role)
                 .claim("sessionId", sessionId.toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * tokenExpiryMinutes))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
