@@ -5,15 +5,13 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 @Getter
 public class ReceiptItem {
 
     private UUID productId;
-    private String productName;
-    private BigDecimal productPrice;
+    private String name;
+    private BigDecimal price;
     private int quantity;
     private BigDecimal subTotal;
 }

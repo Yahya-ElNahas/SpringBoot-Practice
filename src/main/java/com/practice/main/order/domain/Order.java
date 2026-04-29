@@ -21,10 +21,11 @@ public class Order {
 
     private UUID userId;
 
-    @OneToMany
-    private List<OrderItem> items;
+    private int totalItems;
 
     private BigDecimal totalPrice;
+
+    private OrderStatus status;
 
     private Instant createdAt;
 
