@@ -45,6 +45,9 @@ public class AuthService {
 
     @Transactional
     public UserResponse createUser(CreateUserRequest body) {
+        if (userRepository.existsByEmail(body.email())) {
+            throw new EmailAlreadyExistsException();
+        }
 
         User user = User.builder()
                 .name(body.name())
@@ -52,15 +55,10 @@ public class AuthService {
                 .password(passwordEncoder.encode(body.password()))
                 .role(body.role())
                 .build();
-        try {
-            User savedUser = userRepository.save(user);
 
-            log.info("User created: id={} | email={}", savedUser.getId(), savedUser.getEmail());
-
-            return userMapper.toUserResponse(savedUser);
-        } catch (DataIntegrityViolationException e) {
-            throw new EmailAlreadyExistsException();
-        }
+        User savedUser = userRepository.saveAndFlush(user);
+        log.info("User created: id={} | email={}", savedUser.getId(), savedUser.getEmail());
+        return userMapper.toUserResponse(savedUser);
     }
 
     @Transactional

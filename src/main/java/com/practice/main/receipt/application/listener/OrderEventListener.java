@@ -31,10 +31,10 @@ public class OrderEventListener {
         ).toList();
 
         ReceiptDocument receipt = ReceiptDocument.builder()
-                .orderId(event.orderId())
-                .userId(event.userId())
+                .orderId(event.orderId().toString())
+                .userId(event.userId().toString())
                 .items(receiptItems)
-                .totalPrice(event.totalPrice())
+                .totalPrice(event.totalPrice().doubleValue())
                 .status(OrderStatus.PENDING.name())
                 .createdAt(Instant.now())
                 .build();

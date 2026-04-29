@@ -15,12 +15,14 @@ public interface OrderMapper {
 
     OrderResponse toOrderResponse(Order order);
 
-    @Mapping(target = "productId", source = "product.id")
-    @Mapping(target = "subTotal", qualifiedByName = "calculateSubTotal")
+    @Mapping(target = "productId", expression = "java(item.getProduct().getId().toString())")
+    @Mapping(target = "name", source = "product.name")
+    @Mapping(target = "price", source = "product.price")
+    @Mapping(target = "subTotal", source = "item", qualifiedByName = "calculateSubTotal")
     OrderItemDto toOrderItemResponse(CartItem item);
 
     @Named("calculateSubTotal")
-    private BigDecimal calculateSubTotal(CartItem item) {
+    default BigDecimal calculateSubTotal(CartItem item) {
         return BigDecimal.valueOf(item.getQuantity())
                 .multiply(item.getProduct().getPrice());
     }

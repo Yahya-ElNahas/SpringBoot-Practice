@@ -12,4 +12,4 @@ public class MainApplication {
 
 }
 
-// Crone job , Firebase
+// Cron job , Firebase

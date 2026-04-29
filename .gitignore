@@ -6,6 +6,7 @@ target/
 .env
 logs/
 src/main/resources/firebase_account.json
+sales_reports
 
 ### STS ###
 .apt_generated

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -31,6 +32,7 @@ public class Order {
 
     @PrePersist
     public void prePersist() {
+        this.status = OrderStatus.PENDING;
         this.createdAt = Instant.now();
     }
 }

@@ -11,10 +11,10 @@ import java.util.UUID;
 @Getter
 public class ReceiptDocument {
 
-    private UUID orderId;
-    private UUID userId;
+    private String orderId;
+    private String userId;
     private List<ReceiptItem> items;
-    private BigDecimal totalPrice;
+    private double totalPrice;
     private String status;
     private Instant createdAt;
 }

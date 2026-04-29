@@ -20,7 +20,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @PostMapping
+    @PostMapping("/place")
     public ResponseEntity<ApiResponse<OrderResponse>> placeOrder(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {

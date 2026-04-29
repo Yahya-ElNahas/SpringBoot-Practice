@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public record OrderResponse (
     UUID id,
-    List<OrderItemDto> items,
+    int totalItems,
     double totalPrice
 ) {}
