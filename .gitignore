@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 .env
 logs/
-src/main/resources/firebase_account.json
+src/main/resources/firebase_connection.json
 sales_reports
 
 ### STS ###
