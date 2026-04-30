@@ -4,6 +4,7 @@ import com.practice.main.order.domain.Order;
 import com.practice.main.order.infrastructure.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,9 @@ import java.util.List;
 public class SalesReportScheduler {
 
     private final OrderRepository orderRepository;
+
+    @Value("${sales-report.path}")
+    private String PATH;
 
     @Scheduled(cron = "0 0 * * * *")
     public void generateSalesReport() {
@@ -44,7 +48,7 @@ public class SalesReportScheduler {
     }
 
     private void generateCsv(List<Order> orders, Instant date) throws IOException {
-        Path dir = Paths.get("C:\\Users\\Karas\\Downloads\\test\\SpringBoot-Practice\\sales_reports");
+        Path dir = Paths.get(PATH);
         Files.createDirectories(dir);
         Path path = dir.resolve(date.toString().replace(":", "-") + ".csv");
 

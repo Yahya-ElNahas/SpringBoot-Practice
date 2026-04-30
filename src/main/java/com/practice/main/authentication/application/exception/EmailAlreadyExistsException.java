@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class EmailAlreadyExistsException extends DomainException {
     public EmailAlreadyExistsException() {
-        super("exception.email_exists", null, HttpStatus.CONFLICT.value());
+        super("exception.email_exists", null, "AUTH", "002", "EMAIL_ALREADY_EXISTS");
     }
 }

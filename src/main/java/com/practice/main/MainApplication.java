@@ -11,5 +11,3 @@ public class MainApplication {
 	}
 
 }
-
-// Cron job , Firebase

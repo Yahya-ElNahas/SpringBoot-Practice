@@ -18,6 +18,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.Map;
@@ -34,13 +35,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleCodedExceptions(DomainException e, HttpServletRequest request) {
-        log.warn(e.getMessage(), e);
-
-        HttpStatus status = HttpStatus.resolve(e.getStatus());
-
-        return ResponseEntity.status(e.getStatus()).body(new ErrorResponse(
-                status.value(),
-                status.getReasonPhrase(),
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getCode(),
                 messageSource.getMessage(e.getMessage(), e.getArgs(), LocaleContextHolder.getLocale()),
                 null,
                 request.getRequestURI(),
@@ -62,8 +59,6 @@ public class GlobalExceptionHandler {
                         (a, b) -> a
                 ));
 
-        log.warn("Validation failed: {}", errors, e);
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
@@ -79,8 +74,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException e,
                                                            HttpServletRequest request
     ) {
-        log.warn(e.getMessage(), e);
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
@@ -100,10 +93,23 @@ public class GlobalExceptionHandler {
         accessDeniedHandler.handle(request, response, e);
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException e,
+                                                                        HttpServletRequest request
+    ) throws Exception {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                "Resource not found",
+                null,
+                request.getRequestURI(),
+                MDC.get("requestId"),
+                Instant.now()
+        ));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnknownException(Exception e, HttpServletRequest request) {
-        log.error(e.getMessage(), e);
-
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),

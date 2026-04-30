@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class StockUpdateException extends DomainException {
     public StockUpdateException() {
-        super("exception.stock_update", null, HttpStatus.BAD_REQUEST.value());
+        super("exception.stock_update", null, "ORDER", "002", "EMPTY_CART");
     }
 }

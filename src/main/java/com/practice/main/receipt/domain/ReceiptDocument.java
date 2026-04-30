@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Getter
 public class ReceiptDocument {

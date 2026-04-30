@@ -13,12 +13,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,14 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     private final ProductMapper productMapper;
+
+    @Async
+    public CompletableFuture<List<ProductResponse>> getLatestProducts(int number) {
+        List<ProductResponse> products = productRepository.findLatestProducts(PageRequest.of(0, number))
+                .stream().map(productMapper::toProductResponse).toList();
+
+        return CompletableFuture.completedFuture(products);
+    }
 
     public ProductResponse createProduct(UserPrincipal userPrincipal, CreateProductRequest body) {
         UUID userId = userPrincipal.userId();

@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class SessionUserNotFoundException extends DomainException {
     public SessionUserNotFoundException() {
-        super("exception.user_not_found", null, HttpStatus.NOT_FOUND.value());
+        super("exception.user_not_found", null, "AUTH", "001", "USER_NOT_FOUND");
     }
 }

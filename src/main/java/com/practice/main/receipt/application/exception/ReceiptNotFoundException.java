@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class ReceiptNotFoundException extends DomainException {
     public ReceiptNotFoundException() {
-        super("exception.receipt_not_found", null, HttpStatus.NOT_FOUND.value());
+        super("exception.receipt_not_found", null, "RECEIPT", "001", "RECEIPT_NOT_FOUND");
     }
 }

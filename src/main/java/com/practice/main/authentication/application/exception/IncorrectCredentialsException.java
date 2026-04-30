@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class IncorrectCredentialsException extends DomainException {
     public IncorrectCredentialsException() {
-        super("exception.incorrect_credentials", null, HttpStatus.BAD_REQUEST.value());
+        super("exception.incorrect_credentials", null, "AUTH", "003", "INCORRECT_CREDENTIALS");
     }
 }

@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class InsufficientStockException extends DomainException {
     public InsufficientStockException(int stock) {
-        super("exception.insufficient_stock", new Object[]{stock}, HttpStatus.BAD_REQUEST.value());
+        super("exception.insufficient_stock", new Object[]{stock}, "CART", "002", "INSUFFICIENT_STOCK");
     }
 }

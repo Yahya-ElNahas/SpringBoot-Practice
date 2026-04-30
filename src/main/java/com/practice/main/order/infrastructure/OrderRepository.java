@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findAllByCreatedAtBetween(Instant start, Instant end);
+
+    List<Order> findAllByUserId(UUID userId);
 }

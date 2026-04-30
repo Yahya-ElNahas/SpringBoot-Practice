@@ -6,7 +6,7 @@ import com.practice.main.order.application.dto.OrderMapper;
 import com.practice.main.order.application.dto.internal.OrderItemDto;
 import com.practice.main.order.application.dto.response.OrderResponse;
 import com.practice.main.order.application.dto.internal.OrderPlacedEvent;
-import com.practice.main.order.application.exception.EmptyCartExcpetion;
+import com.practice.main.order.application.exception.EmptyCartException;
 import com.practice.main.order.application.exception.StockUpdateException;
 import com.practice.main.order.domain.Order;
 import com.practice.main.order.infrastructure.OrderRepository;
@@ -16,6 +16,7 @@ import com.practice.main.security.principal.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +35,18 @@ public class OrderService {
     private final CartItemRepository cartRepository;
     private final ProductRepository productRepository;
 
-    private final OrderMapper mapper;
+    private final OrderMapper orderMapper;
 
     private final ApplicationEventPublisher eventPublisher;
+
+    @Async
+    public CompletableFuture<List<OrderResponse>> getUserOrdersAsync(UUID userId) {
+        List<OrderResponse> orders = orderRepository.findAllByUserId(userId).stream().map(
+                orderMapper::toOrderResponse
+        ).toList();
+
+        return CompletableFuture.completedFuture(orders);
+    }
 
     @Transactional
     public OrderResponse placeOrder(UserPrincipal userPrincipal) {
@@ -43,7 +54,7 @@ public class OrderService {
 
         List<CartItem> cart = cartRepository.findAllByUserId(userId);
         if(cart.isEmpty()) {
-            throw new EmptyCartExcpetion();
+            throw new EmptyCartException();
         }
 
         List<OrderItemDto> orderItems = new ArrayList<>();
@@ -63,7 +74,7 @@ public class OrderService {
                     .multiply(product.getPrice());
             totalItems += cartItem.getQuantity();
 
-            orderItems.add(mapper.toOrderItemResponse(cartItem));
+            orderItems.add(orderMapper.toOrderItemResponse(cartItem));
 
             totalPrice = totalPrice.add(subTotal);
         }
@@ -84,6 +95,6 @@ public class OrderService {
 
         cartRepository.deleteAllByUserId(userId);
 
-        return mapper.toOrderResponse(savedOrder);
+        return orderMapper.toOrderResponse(savedOrder);
     }
 }

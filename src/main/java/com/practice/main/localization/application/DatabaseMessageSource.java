@@ -24,7 +24,7 @@ public class DatabaseMessageSource implements MessageSource {
             Locale locale
     ) throws NoSuchMessageException {
         String language = locale != null ? locale.getLanguage() : "en";
-        String message = service.getMessage(code, language);
+        String message = service.getLocalizedMessage(code, language);
 
         return format(message, args);
     }

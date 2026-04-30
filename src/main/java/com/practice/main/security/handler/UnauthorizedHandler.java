@@ -1,6 +1,7 @@
 package com.practice.main.security.handler;
 
 import com.practice.main.common.response.ErrorResponse;
+import com.practice.main.common.util.IpExtractor;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,7 +39,7 @@ public class UnauthorizedHandler implements AuthenticationEntryPoint {
                 Instant.now()
         );
 
-        log.warn(error.error(), error);
+        log.warn("{} | ip={}", error.error(), IpExtractor.getClientIp(request));
 
         responseWriter.write(error, HttpStatus.UNAUTHORIZED, response);
     }

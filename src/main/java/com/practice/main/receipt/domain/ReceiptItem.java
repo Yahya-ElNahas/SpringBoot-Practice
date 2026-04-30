@@ -2,6 +2,8 @@ package com.practice.main.receipt.domain;
 
 import lombok.*;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Getter
 public class ReceiptItem {

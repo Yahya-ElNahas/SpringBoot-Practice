@@ -6,11 +6,11 @@ import lombok.Getter;
 public class DomainException extends RuntimeException {
 
     private final Object[] args;
-    private final int status;
+    private final String code;
 
-    public DomainException(String message, Object[] args, int status) {
+    public DomainException(String message, Object[] args, String feature, String status, String code) {
         super(message);
         this.args = args;
-        this.status = status;
+        this.code = feature.toUpperCase() + '_' + status + '_' + code;
     }
 }

@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class InvalidSessionException extends DomainException {
     public InvalidSessionException() {
-        super("exception.invalid_session", null, HttpStatus.UNAUTHORIZED.value());
+        super("exception.invalid_session", null, "AUTH", "004", "INVALID_SESSION");
     }
 }

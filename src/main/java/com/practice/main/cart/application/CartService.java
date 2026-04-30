@@ -11,12 +11,14 @@ import com.practice.main.security.principal.UserPrincipal;
 import com.practice.main.product.domain.Product;
 import com.practice.main.product.infrastructure.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,13 @@ public class CartService {
     private final ProductRepository productRepository;
 
     private final CartMapper cartMapper;
+
+    @Async
+    public CompletableFuture<List<CartItemResponse>> getUserCartAsync(UUID userId) {
+        List<CartItem> cart = cartItemRepository.findAllByUserId(userId);
+
+        return CompletableFuture.completedFuture(cartMapper.toCartItemListResponse(cart));
+    }
 
     @Transactional
     public List<CartItemResponse> addProductToCart(UserPrincipal userPrincipal, AddToCartRequest body) {

@@ -13,7 +13,7 @@ public class LocalizationCacheService {
     private final LocalizationRepository localizationRepository;
 
     @Cacheable(value = "localization", key = "#code + '_' + #language")
-    public String getMessage(String code, String language) {
+    public String getLocalizedMessage(String code, String language) {
         return localizationRepository.findByCodeAndLanguage(code, language)
                 .or(() -> localizationRepository.findByCodeAndLanguage(code, "en"))
                 .map(Localization::getMessage)

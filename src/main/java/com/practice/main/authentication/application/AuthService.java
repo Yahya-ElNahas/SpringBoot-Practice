@@ -2,6 +2,7 @@ package com.practice.main.authentication.application;
 
 import com.practice.main.authentication.domain.Session;
 import com.practice.main.authentication.infrastructure.SessionRepository;
+import com.practice.main.common.event.LoggingEvent;
 import com.practice.main.security.token.RefreshTokenService;
 import com.practice.main.authentication.application.dto.response.AuthTokens;
 import com.practice.main.user.application.dto.UserMapper;
@@ -15,9 +16,7 @@ import com.practice.main.user.domain.User;
 import com.practice.main.user.Infrastructure.UserRepository;
 import com.practice.main.security.token.AccessTokenService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -44,6 +42,7 @@ public class AuthService {
     private int refreshTokenExpiryHours;
 
     @Transactional
+    @LoggingEvent("CREATE_USER")
     public UserResponse createUser(CreateUserRequest body) {
         if (userRepository.existsByEmail(body.email())) {
             throw new EmailAlreadyExistsException();
@@ -57,18 +56,16 @@ public class AuthService {
                 .build();
 
         User savedUser = userRepository.saveAndFlush(user);
-        log.info("User created: id={} | email={}", savedUser.getId(), savedUser.getEmail());
         return userMapper.toUserResponse(savedUser);
     }
 
     @Transactional
+    @LoggingEvent("LOGIN")
     public AuthTokens login(LoginRequest body) {
         User user = userRepository.findByEmail(body.email())
                 .orElseThrow(IncorrectCredentialsException::new);
 
         if(!passwordEncoder.matches(body.password(), user.getPassword())) {
-            log.warn("Login failed with email: {}", user.getEmail());
-
             throw new IncorrectCredentialsException();
         }
 
@@ -94,6 +91,7 @@ public class AuthService {
     }
 
     @Transactional
+    @LoggingEvent("REFRESH_TOKEN")
     public AuthTokens refreshAccessToken(String refreshToken) {
         String hashedToken = refreshTokenService.hash(refreshToken);
 
@@ -124,6 +122,7 @@ public class AuthService {
     }
 
     @Transactional
+    @LoggingEvent("LOGOUT")
     public void logout(String refreshToken) {
         String hashedToken = refreshTokenService.hash(refreshToken);
 

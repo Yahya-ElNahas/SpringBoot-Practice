@@ -24,7 +24,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     List<CartItem> findAllByUserId(UUID userId);
 
     @Query("""
-            DELETE FROM CartItem 
+            DELETE FROM CartItem
             WHERE userId = :userId
             """)
     @Modifying

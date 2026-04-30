@@ -1,5 +1,6 @@
 package com.practice.main.user.application;
 
+import com.practice.main.common.event.LoggingEvent;
 import com.practice.main.user.application.dto.UserMapper;
 import com.practice.main.user.Infrastructure.UserRepository;
 import com.practice.main.user.domain.User;
@@ -11,10 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +28,22 @@ public class UserService {
 
     private final UserMapper userMapper;
 
+    @Async
+    public CompletableFuture<UserResponse> getUserAsync(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        return CompletableFuture.completedFuture(userMapper.toUserResponse(user));
+    }
+
+    @LoggingEvent("GET_USER_BY_EMAIL")
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
         return userMapper.toUserResponse(user);
     }
 
+    @LoggingEvent("GET_ALL_USERS")
     public AllUsersResponse getAllUsers(
             int pageNumber,
             int pageSize,
