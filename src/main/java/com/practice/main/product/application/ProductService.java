@@ -30,14 +30,6 @@ public class ProductService {
 
     private final ProductMapper productMapper;
 
-    @Async
-    public CompletableFuture<List<ProductResponse>> getLatestProducts(int number) {
-        List<ProductResponse> products = productRepository.findLatestProducts(PageRequest.of(0, number))
-                .stream().map(productMapper::toProductResponse).toList();
-
-        return CompletableFuture.completedFuture(products);
-    }
-
     public ProductResponse createProduct(UserPrincipal userPrincipal, CreateProductRequest body) {
         UUID userId = userPrincipal.userId();
 
@@ -82,5 +74,10 @@ public class ProductService {
                 productPage.getTotalElements(),
                 productPage.getTotalPages()
         );
+    }
+
+    public List<ProductResponse> getLatestProducts(int number) {
+        return productRepository.findLatestProducts(PageRequest.of(0, number)).stream()
+                .map(productMapper::toProductResponse).toList();
     }
 }

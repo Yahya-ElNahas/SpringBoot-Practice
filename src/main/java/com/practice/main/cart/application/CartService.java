@@ -29,11 +29,10 @@ public class CartService {
 
     private final CartMapper cartMapper;
 
-    @Async
-    public CompletableFuture<List<CartItemResponse>> getUserCartAsync(UUID userId) {
+    public List<CartItemResponse> getUserCart(UUID userId) {
         List<CartItem> cart = cartItemRepository.findAllByUserId(userId);
 
-        return CompletableFuture.completedFuture(cartMapper.toCartItemListResponse(cart));
+        return cartMapper.toCartItemListResponse(cart);
     }
 
     @Transactional

@@ -14,10 +14,10 @@ public class AsyncConfig implements AsyncConfigurer {
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(1);
+        executor.setCorePoolSize(3);
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(5);
-        executor.setThreadNamePrefix("AsyncExecutor-");
+        executor.setThreadNamePrefix("AsyncThread-");
         executor.initialize();
         return executor;
     }

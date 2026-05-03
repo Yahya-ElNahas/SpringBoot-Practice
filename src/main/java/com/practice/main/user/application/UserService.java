@@ -28,12 +28,11 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-    @Async
-    public CompletableFuture<UserResponse> getUserAsync(UUID userId) {
+    public UserResponse getUser(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        return CompletableFuture.completedFuture(userMapper.toUserResponse(user));
+        return userMapper.toUserResponse(user);
     }
 
     @LoggingEvent("GET_USER_BY_EMAIL")

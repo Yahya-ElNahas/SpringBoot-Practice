@@ -39,13 +39,9 @@ public class OrderService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @Async
-    public CompletableFuture<List<OrderResponse>> getUserOrdersAsync(UUID userId) {
-        List<OrderResponse> orders = orderRepository.findAllByUserId(userId).stream().map(
-                orderMapper::toOrderResponse
-        ).toList();
-
-        return CompletableFuture.completedFuture(orders);
+    public List<OrderResponse> getUserOrders(UUID userId) {
+        return orderRepository.findAllByUserId(userId).stream()
+                .map(orderMapper::toOrderResponse).toList();
     }
 
     @Transactional

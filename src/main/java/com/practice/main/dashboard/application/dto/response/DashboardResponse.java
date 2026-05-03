@@ -1,4 +1,4 @@
-package com.practice.main.dashboard.application.dto;
+package com.practice.main.dashboard.application.dto.response;
 
 import com.practice.main.cart.application.dto.response.CartItemResponse;
 import com.practice.main.order.application.dto.response.OrderResponse;
