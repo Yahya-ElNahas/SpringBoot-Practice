@@ -9,7 +9,7 @@ public class TaskExecutionException extends DomainException {
     private final String feature;
     private final String method;
 
-    public TaskExecutionException(String feature, String method, DomainException exception) {
+    public TaskExecutionException(String feature, String method, Exception exception) {
         super("exception.task_execution", new Object[]{exception.getMessage()}, "DASHBOARD", "002", "TASK_EXECUTION_ERROR");
         this.feature = feature;
         this.method = method;

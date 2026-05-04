@@ -1,4 +1,4 @@
-package com.practice.main.common.aspect.pointcuts;
+package com.practice.main.logging.aspect.pointcuts;
 
 import com.practice.main.common.event.LoggingEvent;
 import org.aspectj.lang.annotation.Pointcut;

@@ -1,4 +1,4 @@
-package com.practice.main.common.aspect;
+package com.practice.main.logging.aspect;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

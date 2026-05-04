@@ -30,22 +30,19 @@ public class TaskExecutionUtil {
             Method method = Arrays.stream(targetClass.getMethods())
                     .filter(m -> m.getName().equals(task.method()))
                     .findFirst()
-                    .orElseThrow(() -> new NoSuchMethodException(task.method()));
+                    .orElseThrow(() -> new NoSuchMethodException("Method not found: " + task.method()));
 
-            List<Object> args = typeCast(
-                    task.args().toArray(),
-                    method.getParameterTypes()
-            );
-
-            if(Arrays.asList(method.getParameterTypes()).contains(UserPrincipal.class)) {
-                args.addFirst(userPrincipal);
-            }
+            Object[] args = method.getParameterCount() > 0 ? formMethodArgs(
+                        userPrincipal,
+                        task.args().toArray(),
+                        method.getParameterTypes()
+                    ) : null;
 
             Class<?> returnType = method.getReturnType();
 
-            Object result = returnType.cast(method.invoke(bean, args.toArray()));
+            Object result = returnType.cast(method.invoke(bean, args));
 
-            new TaskResponse(
+            return new TaskResponse(
                     task.feature(),
                     task.method(),
                     result
@@ -53,64 +50,64 @@ public class TaskExecutionUtil {
 
         } catch (InvocationTargetException e) {
             throw new TaskExecutionException(task.feature(), task.method(), (DomainException) e.getTargetException());
+        } catch (NoSuchMethodException e) {
+            throw new TaskExecutionException(task.feature(), task.method(), e);
         }
-        return null;
     }
 
-    private List<Object> typeCast(Object[] args, Class<?>[] types) throws Exception {
+    private Object[] formMethodArgs(UserPrincipal userPrincipal, Object[] args, Class<?>[] types) throws Exception {
         List<Object> result = new ArrayList<>();
 
-        for(int i = 0, j = 0; j < types.length; i++, j++) {
-            Object arg = args[i];
-            Class<?> type = types[j];
-
+        int argIndex = 0;
+        for(Class<?> type : types) {
             if(type.equals(UserPrincipal.class)) {
-                i--;
+                result.add(userPrincipal);
                 continue;
             }
-
-            if(arg instanceof Map<?,?>) {
-                Constructor<?> constructor = Arrays.stream(type.getConstructors()).findFirst().orElseThrow();
-
-                Parameter[] params = constructor.getParameters();
-
-                Object[] values = new Object[params.length];
-
-                int index = 0;
-                for(Parameter param : params) {
-                    Object value = ((Map<?, ?>)arg).get(param.getName());
-
-                    if(param.getType().equals(double.class)) {
-                        values[index++] = ((Number) value).doubleValue();
-
-                        continue;
-                    }
-
-                    if(param.getType().equals(int.class)) {
-                        values[index++] = ((Number) value).intValue();
-
-                        continue;
-                    }
-
-                    values[index++] = param.getType().cast(value);
-                }
-
-                Object instance = constructor.newInstance(values);
-
-                result.add(instance);
-
-                continue;
-            }
-
-            if(type.equals(UUID.class)) {
-                result.add(UUID.fromString(arg.toString()));
-
-                continue;
-            }
-
-            result.add(type.cast(arg));
+            result.add(typCast(args[argIndex++], type));
         }
 
-        return  result;
+        return result.toArray();
+    }
+
+    private Object typCast(Object arg, Class<?> type) throws Exception {
+        if(arg == null) {
+            return null;
+        }
+
+        if(type.equals(String.class)) {
+            return arg.toString();
+        }
+
+        if(type.equals(UUID.class)) {
+            return UUID.fromString(arg.toString());
+        }
+
+        if(type.equals(int.class)) {
+            return Integer.parseInt(arg.toString());
+        }
+
+        if(type.equals(double.class)) {
+            return Double.parseDouble(arg.toString());
+        }
+
+        if(arg instanceof Map<?,?> map) {
+            Constructor<?> constructor = Arrays.stream(type.getConstructors())
+                    .findFirst()
+                    .orElseThrow();
+            Parameter[] parameters = constructor.getParameters();
+
+            Object[] values = new Object[parameters.length];
+            for(int i = 0; i < parameters.length; i++) {
+                Parameter parameter = parameters[i];
+                Object value = map.get(parameter.getName());
+
+                values[i] = typCast(value, parameter.getType());
+            }
+
+            return constructor.newInstance(values);
+        }
+
+        return type.cast(arg);
     }
 }

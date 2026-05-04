@@ -2,7 +2,6 @@ package com.practice.main.dashboard.application;
 
 import com.practice.main.cart.application.CartService;
 import com.practice.main.cart.application.dto.response.CartItemResponse;
-import com.practice.main.common.exception.DomainException;
 import com.practice.main.dashboard.application.dto.request.TaskRequest;
 import com.practice.main.dashboard.application.dto.response.DashboardResponse;
 import com.practice.main.dashboard.application.dto.response.TaskResponse;
@@ -17,13 +16,8 @@ import com.practice.main.user.application.UserService;
 import com.practice.main.user.application.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -97,9 +91,7 @@ public class DashboardService {
                     future -> {
                         try {
                             return future.get();
-
                         }  catch (ExecutionException e) {
-
                             if(e.getCause() instanceof TaskExecutionException taskEx) {
                                 return new TaskResponse(
                                         taskEx.getFeature(),
@@ -107,7 +99,6 @@ public class DashboardService {
                                         taskEx.getArgs()
                                 );
                             }
-
                             throw new RuntimeException(e);
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);

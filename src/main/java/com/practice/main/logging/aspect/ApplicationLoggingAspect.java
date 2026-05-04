@@ -1,15 +1,11 @@
-package com.practice.main.common.aspect;
+package com.practice.main.logging.aspect;
 
 import com.practice.main.common.event.LoggingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Method;
 
 @Component
 @Aspect
