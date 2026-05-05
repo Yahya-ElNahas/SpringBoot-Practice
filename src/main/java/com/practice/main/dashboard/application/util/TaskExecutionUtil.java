@@ -5,10 +5,13 @@ import com.practice.main.dashboard.application.dto.request.TaskRequest;
 import com.practice.main.dashboard.application.dto.response.TaskResponse;
 import com.practice.main.dashboard.application.exception.TaskExecutionException;
 import com.practice.main.security.principal.UserPrincipal;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintViolation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.Validator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -40,18 +43,23 @@ public class TaskExecutionUtil {
 
             Class<?> returnType = method.getReturnType();
 
+            long startTime = System.currentTimeMillis();
+
             Object result = returnType.cast(method.invoke(bean, args));
+
+            long endTime = System.currentTimeMillis() - startTime;
 
             return new TaskResponse(
                     task.feature(),
                     task.method(),
-                    result
+                    result,
+                    endTime + "ms"
             );
 
         } catch (InvocationTargetException e) {
-            throw new TaskExecutionException(task.feature(), task.method(), (DomainException) e.getTargetException());
+            throw new TaskExecutionException((DomainException) e.getTargetException());
         } catch (NoSuchMethodException e) {
-            throw new TaskExecutionException(task.feature(), task.method(), e);
+            throw new TaskExecutionException(e);
         }
     }
 
@@ -60,6 +68,9 @@ public class TaskExecutionUtil {
 
         int argIndex = 0;
         for(Class<?> type : types) {
+            if(argIndex >= args.length) {
+                throw new Exception("Incorrect method parameters");
+            }
             if(type.equals(UserPrincipal.class)) {
                 result.add(userPrincipal);
                 continue;

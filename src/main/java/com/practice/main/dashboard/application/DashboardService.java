@@ -2,6 +2,7 @@ package com.practice.main.dashboard.application;
 
 import com.practice.main.cart.application.CartService;
 import com.practice.main.cart.application.dto.response.CartItemResponse;
+import com.practice.main.dashboard.application.dto.internal.TaskFuture;
 import com.practice.main.dashboard.application.dto.request.TaskRequest;
 import com.practice.main.dashboard.application.dto.response.DashboardResponse;
 import com.practice.main.dashboard.application.dto.response.TaskResponse;
@@ -16,20 +17,25 @@ import com.practice.main.user.application.UserService;
 import com.practice.main.user.application.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class DashboardService {
 
     private final UserService userService;
     private final CartService cartService;
     private final OrderService orderService;
     private final ProductService productService;
+
+    private final ApplicationContext applicationContext;
 
     private final TaskExecutionUtil taskExecutor;
 
@@ -81,30 +87,67 @@ public class DashboardService {
     public List<TaskResponse> executeAllTasks(UserPrincipal userPrincipal, List<TaskRequest> requestBody) {
         try(ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
-            List<Future<TaskResponse>> taskFutures = requestBody.stream().map(
-                    taskRequest -> executor.submit(
-                            () -> taskExecutor.executeTask(userPrincipal, taskRequest)
+            List<TaskFuture> taskFutures = requestBody.stream().map(
+                    taskRequest -> new TaskFuture(
+                            executor.submit(() -> taskExecutor.executeTask(userPrincipal, taskRequest)),
+                            taskRequest
                     )
             ).toList();
 
             return taskFutures.stream().map(
-                    future -> {
+                    taskFuture -> {
                         try {
-                            return future.get();
+                            return taskFuture.future().get(2, TimeUnit.SECONDS);
                         }  catch (ExecutionException e) {
+                            String message = e.getCause().getMessage();
+
                             if(e.getCause() instanceof TaskExecutionException taskEx) {
-                                return new TaskResponse(
-                                        taskEx.getFeature(),
-                                        taskEx.getMethod(),
-                                        taskEx.getArgs()
-                                );
+                                message = taskEx.getArgs()[0].toString();
                             }
-                            throw new RuntimeException(e);
+
+                            return new TaskResponse(
+                                    taskFuture.taskRequest().feature(),
+                                    taskFuture.taskRequest().method(),
+                                    message,
+                                    null
+                            );
+                        } catch (TimeoutException e) {
+                            taskFuture.future().cancel(true);
+                            return new TaskResponse(
+                                    taskFuture.taskRequest().feature(),
+                                    taskFuture.taskRequest().method(),
+                                    e.getMessage(),
+                                    null
+                            );
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                     }
             ).toList();
         }
+    }
+
+    public Map<String, List<String>> getAllServices() {
+        String[] serviceNames = {"user", "product", "cart", "order", "receipt"};
+
+        Map<String, List<String>> services = new HashMap<>();
+        for(String serviceName : serviceNames) {
+            Object bean = applicationContext.getBean(serviceName + "Service");
+            Class<?> targetClass = AopUtils.getTargetClass(bean);
+
+            List<String> methods = Arrays.stream(targetClass.getDeclaredMethods())
+                    .map(method -> {
+                        List<String> parameters = Arrays.stream(method.getParameters()).map(
+                                parameter -> parameter.getType().getSimpleName() + ' ' + parameter.getName()
+                        ).toList();
+                        return method.getName() + '(' + parameters + ')';
+                    })
+                    .filter(name -> !name.startsWith("lambda"))
+                    .toList();
+
+            services.put(serviceName, methods);
+        }
+
+        return services;
     }
 }

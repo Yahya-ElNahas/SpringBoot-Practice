@@ -11,14 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
 public class DashboardController {
@@ -40,6 +38,13 @@ public class DashboardController {
             @RequestBody List<TaskRequest> requestBody
     ) {
         List<TaskResponse> result = dashboardService.executeAllTasks(userPrincipal, requestBody);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @GetMapping("/tasks")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Map<String, List<String>>>> getAllServices() {
+        Map<String, List<String>> result = dashboardService.getAllServices();
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

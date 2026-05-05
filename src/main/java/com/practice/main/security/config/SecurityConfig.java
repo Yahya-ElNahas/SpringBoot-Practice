@@ -4,6 +4,7 @@ import com.practice.main.security.handler.AccessDeniedHandler;
 import com.practice.main.security.handler.UnauthorizedHandler;
 import com.practice.main.security.filter.TokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -29,10 +35,14 @@ public class SecurityConfig {
     private final AccessDeniedHandler accessDeniedHandler;
     private final UnauthorizedHandler unauthorizedHandler;
 
+    @Value("${FRONTEND_URL}")
+    private String FRONTEND_URL;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
@@ -42,7 +52,8 @@ public class SecurityConfig {
                                         "/products/**",
                                         "/order/**",
                                         "/receipts/**",
-                                        "/dashboard/**"
+                                        "/dashboard/**",
+                                        "/actuator/**"
                                 ).authenticated()
 
                                 .requestMatchers("/error").permitAll()
@@ -63,5 +74,33 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cors = new CorsConfiguration();
+
+        cors.addAllowedOrigin(FRONTEND_URL);
+
+        cors.setAllowedMethods(
+                List.of("GET", "POST", "PATCH", "DELETE")
+        );
+
+        cors.setAllowedHeaders(
+                List.of("Authorization", "Content-Type", "Accept-Language")
+        );
+
+        cors.setExposedHeaders(
+                List.of("X-Request-Id")
+        );
+
+        cors.setAllowCredentials(true);
+
+        cors.setMaxAge(60L * 60L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cors);
+
+        return source;
     }
 }

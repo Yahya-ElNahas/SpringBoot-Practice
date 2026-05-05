@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: test
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+  messages:
+    encoding: UTF-8
+
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  servlet:
+    context-path: /api/v1
+
+jwt:
+  secret: ${JWT_SECRET}
+
+auth:
+  access-token:
+    expiry-minutes: 5
+  refresh-token:
+    expiry-hours: 1
+
+logging:
+  level:
+    org.hibernate: WARN
+    org.springframework.security: WARN
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: -method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+sales-report:
+  path: ${SALES_REPORT_PATH}
