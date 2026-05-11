@@ -1,5 +1,6 @@
 package com.practice.main.authentication.domain;
 
+import com.practice.main.user.domain.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,8 +1,8 @@
 package com.practice.main.security.filter;
 
-import com.practice.main.authentication.domain.Session;
+import com.practice.main.common.cache.SessionCache;
+import com.practice.main.authentication.application.util.SessionCacheService;
 import com.practice.main.authentication.application.exception.InvalidSessionException;
-import com.practice.main.authentication.infrastructure.SessionRepository;
 import com.practice.main.security.token.AccessTokenService;
 import com.practice.main.security.principal.UserPrincipal;
 import io.jsonwebtoken.Claims;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +30,7 @@ import java.util.UUID;
 public class TokenFilter extends OncePerRequestFilter {
 
     private final AccessTokenService accessTokenService;
-    private final SessionRepository sessionRepository;
+    private final SessionCacheService cacheService;
 
     @Override
     protected void doFilterInternal(
@@ -56,10 +55,8 @@ public class TokenFilter extends OncePerRequestFilter {
             String role = accessTokenService.extractRole(claims);
             UUID sessionId = accessTokenService.extractSessionId(claims);
 
-            Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(InvalidSessionException::new);
-            if(session.isRevoked() || session.getExpiryDate().isBefore(Instant.now())
-            ) {
+            String session = cacheService.getBySessionId(sessionId.toString());
+            if(session == null) {
                 throw new InvalidSessionException();
             }
 
@@ -80,6 +77,8 @@ public class TokenFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
+
+            log.error("", e);
 
             log.warn("Token validation failed: {} - {}", e.getClass().getSimpleName(), e.getMessage());
         }

@@ -1,4 +1,4 @@
-package com.practice.main.security.token;
+package com.practice.main.authentication.application.util;
 
 import org.springframework.stereotype.Service;
 
