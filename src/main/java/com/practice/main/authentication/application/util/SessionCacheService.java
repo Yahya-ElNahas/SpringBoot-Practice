@@ -3,7 +3,7 @@ package com.practice.main.authentication.application.util;
 import com.practice.main.common.cache.SessionCache;
 import com.practice.main.authentication.domain.Session;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +14,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SessionCacheService {
 
+    @Qualifier("sessionRedisTemplate")
     private final RedisTemplate<String, SessionCache> redisTemplate;
 
     public void cache(Session session) {
@@ -27,8 +27,8 @@ public class SessionCacheService {
         );
     }
 
-    public String getBySessionId(String sessionId) {
-         return redisTemplate.opsForValue().get("session:" + sessionId).token();
+    public SessionCache getBySessionId(String sessionId) {
+        return redisTemplate.opsForValue().get("session:" + sessionId);
     }
 
     public void deleteBySessionIds(List<UUID> sessionIds) {

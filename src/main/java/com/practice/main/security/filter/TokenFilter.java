@@ -55,7 +55,7 @@ public class TokenFilter extends OncePerRequestFilter {
             String role = accessTokenService.extractRole(claims);
             UUID sessionId = accessTokenService.extractSessionId(claims);
 
-            String session = cacheService.getBySessionId(sessionId.toString());
+            SessionCache session = cacheService.getBySessionId(sessionId.toString());
             if(session == null) {
                 throw new InvalidSessionException();
             }

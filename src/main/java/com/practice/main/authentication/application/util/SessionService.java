@@ -1,8 +1,10 @@
 package com.practice.main.authentication.application.util;
 
+import com.practice.main.authentication.application.dto.response.AuthTokens;
 import com.practice.main.authentication.application.exception.InvalidSessionException;
 import com.practice.main.authentication.domain.Session;
 import com.practice.main.authentication.infrastructure.SessionRepository;
+import com.practice.main.security.token.AccessTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,13 +22,13 @@ public class SessionService {
     private final SessionRepository sessionRepository;
 
     private final RefreshTokenService refreshTokenService;
+    private final AccessTokenService accessTokenService;
     private final SessionCacheService cacheService;
 
     @Value("${auth.refresh-token.expiry-hours}")
     private int refreshTokenExpiryHours;
 
-    public Session createSession(UUID userId, String userRole) {
-
+    public AuthTokens createSession(UUID userId, String userRole) {
         List<UUID> revokedSessions = sessionRepository.revokeAllByUserId(userId);
 
         cacheService.deleteBySessionIds(revokedSessions);
@@ -43,10 +45,16 @@ public class SessionService {
 
         cacheService.cache(savedSession);
 
-        return savedSession;
+        String accessToken = accessTokenService.generateToken(
+                savedSession.getUserId(),
+                savedSession.getUserRole(),
+                savedSession.getId()
+        );
+
+        return new AuthTokens(accessToken, refreshToken);
     }
 
-    public Session refreshToken(String refreshToken) {
+    public AuthTokens refreshToken(String refreshToken) {
         String hashedToken = refreshTokenService.hash(refreshToken);
 
         Session session = sessionRepository.findByToken(hashedToken)
@@ -71,7 +79,13 @@ public class SessionService {
 
         cacheService.cache(savedSession);
 
-        return savedSession;
+        String accessToken = accessTokenService.generateToken(
+                savedSession.getUserId(),
+                savedSession.getUserRole(),
+                savedSession.getId()
+        );
+
+        return new AuthTokens(accessToken, newRefreshToken);
     }
 
     public void revokeSession(String refreshToken) {

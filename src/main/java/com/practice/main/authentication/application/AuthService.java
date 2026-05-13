@@ -1,7 +1,6 @@
 package com.practice.main.authentication.application;
 
 import com.practice.main.authentication.application.util.SessionService;
-import com.practice.main.authentication.domain.Session;
 import com.practice.main.common.event.LoggingEvent;
 import com.practice.main.authentication.application.dto.response.AuthTokens;
 import com.practice.main.user.application.dto.UserMapper;
@@ -12,14 +11,11 @@ import com.practice.main.authentication.application.exception.EmailAlreadyExists
 import com.practice.main.authentication.application.exception.IncorrectCredentialsException;
 import com.practice.main.user.domain.User;
 import com.practice.main.user.Infrastructure.UserRepository;
-import com.practice.main.security.token.AccessTokenService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -27,7 +23,6 @@ public class AuthService {
     private final UserRepository userRepository;
 
     private final SessionService sessionService;
-    private final AccessTokenService accessTokenService;
 
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -60,30 +55,13 @@ public class AuthService {
             throw new IncorrectCredentialsException();
         }
 
-        Session session = sessionService.createSession(user.getId(), user.getRole().name());
-
-        String accessToken = accessTokenService.generateToken(
-                user.getId(),
-                user.getRole().name(),
-                session.getId()
-        );
-
-        return new AuthTokens(accessToken, session.getToken());
+        return sessionService.createSession(user.getId(), user.getRole().name());
     }
 
     @Transactional
     @LoggingEvent("REFRESH_TOKEN")
     public AuthTokens refreshAccessToken(String refreshToken) {
-
-        Session session = sessionService.refreshToken(refreshToken);
-
-        String accessToken = accessTokenService.generateToken(
-                session.getUserId(),
-                session.getUserRole(),
-                session.getId()
-        );
-
-        return new AuthTokens(accessToken, session.getToken());
+        return sessionService.refreshToken(refreshToken);
     }
 
     @Transactional
