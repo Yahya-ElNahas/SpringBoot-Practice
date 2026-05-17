@@ -39,7 +39,7 @@ public class SecurityConfig {
     private String FRONTEND_URL;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -53,8 +53,11 @@ public class SecurityConfig {
                                         "/order/**",
                                         "/receipts/**",
                                         "/dashboard/**",
-                                        "/actuator/**"
+                                        "/llm"
                                 ).authenticated()
+
+                                .requestMatchers("/actuator/prometheus").permitAll()
+                                .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                                 .requestMatchers("/error").permitAll()
 
