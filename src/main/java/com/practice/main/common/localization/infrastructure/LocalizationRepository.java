@@ -1,6 +1,6 @@
-package com.practice.main.localization.infrastructure;
+package com.practice.main.common.localization.infrastructure;
 
-import com.practice.main.localization.domain.Localization;
+import com.practice.main.common.localization.domain.Localization;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

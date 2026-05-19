@@ -1,7 +1,7 @@
-package com.practice.main.localization.application;
+package com.practice.main.common.localization.application;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 import java.text.MessageFormat;
 import java.util.Locale;
 
+@Slf4j
 @Component("messageSource")
 @RequiredArgsConstructor
 public class DatabaseMessageSource implements MessageSource {
 
-    private final LocalizationCacheService service;
+    private final LocalizationService service;
 
     @Override
-    @Cacheable(value = "localization", key = "#code + '_' + (#locale != null ? #locale.getLanguage() : 'en')")
     public String getMessage(
             String code,
             Object [] args,
@@ -26,7 +26,7 @@ public class DatabaseMessageSource implements MessageSource {
         String language = locale != null ? locale.getLanguage() : "en";
         String message = service.getLocalizedMessage(code, language);
 
-        return format(message, args);
+        return format(message != null ? message : code, args);
     }
 
     @Override
@@ -36,7 +36,11 @@ public class DatabaseMessageSource implements MessageSource {
             String defaultMessage,
             Locale locale
     ) {
-        return getMessage(code, args, locale);
+        try {
+            return getMessage(code, args, locale);
+        } catch (NoSuchMessageException e) {
+            return defaultMessage;
+        }
     }
 
     @Override

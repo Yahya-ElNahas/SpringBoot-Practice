@@ -2,6 +2,7 @@ package com.practice.main.authentication.application.util;
 
 import com.practice.main.authentication.application.dto.response.AuthTokens;
 import com.practice.main.authentication.application.exception.InvalidSessionException;
+import com.practice.main.authentication.application.exception.SessionUserNotFoundException;
 import com.practice.main.authentication.domain.Session;
 import com.practice.main.authentication.infrastructure.SessionRepository;
 import com.practice.main.security.token.AccessTokenService;
@@ -65,6 +66,10 @@ public class SessionService {
         }
 
         UUID userId = session.getUserId();
+
+        if(userId == null) {
+            throw new SessionUserNotFoundException();
+        }
 
         List<UUID> revokedSessions = sessionRepository.revokeAllByUserId(userId);
 

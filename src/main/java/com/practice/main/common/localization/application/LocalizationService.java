@@ -1,14 +1,14 @@
-package com.practice.main.localization.application;
+package com.practice.main.common.localization.application;
 
-import com.practice.main.localization.domain.Localization;
-import com.practice.main.localization.infrastructure.LocalizationRepository;
+import com.practice.main.common.localization.domain.Localization;
+import com.practice.main.common.localization.infrastructure.LocalizationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LocalizationCacheService {
+public class LocalizationService {
 
     private final LocalizationRepository localizationRepository;
 

@@ -1,4 +1,4 @@
-package com.practice.main.logging.aspect;
+package com.practice.main.common.logging.aspect;
 
 import com.practice.main.common.event.LoggingEvent;
 import lombok.RequiredArgsConstructor;

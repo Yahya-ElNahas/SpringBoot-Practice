@@ -1,4 +1,4 @@
-package com.practice.main.localization.domain;
+package com.practice.main.common.localization.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
